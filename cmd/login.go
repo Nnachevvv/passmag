@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/nnachevv/passmag/crypt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/argon2"
@@ -25,6 +25,7 @@ var loginQs = []*survey.Question{
 			if !ok || len(email) < 8 {
 				return errors.New("email should be longer than 8 characters")
 			}
+
 			return nil
 		},
 	},
@@ -50,47 +51,30 @@ var loginCmd = &cobra.Command{
 			MasterPassword string
 		}{}
 
-		db := struct {
-			vaultPwd string `bson:"vaultPwd"`
-		}{}
-
 		err := survey.Ask(loginQs, &answers)
 		if err != nil {
 			return err
 		}
-		fmt.Println(answers.MasterPassword)
-		fmt.Println(answers.Email)
 
-		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(answers.Email), 1, 64*1024, 4, 32)
-
-		collection.FindOne(context.Background(), bson.M{"vaultPwd": vaultPwd}).Decode(&db)
-
-		fmt.Println(string(vaultPwd))
-		fmt.Println("---------------------")
-		fmt.Println(string(db.vaultPwd))
-		fmt.Println("---------------------")
-
-		if db.vaultPwd == "" || string(vaultPwd) != db.vaultPwd {
-			return errors.New("failed to find this account")
-		}
-
-		var record bson.M
-		collection.FindOne(context.Background(), bson.M{"vaultPwd": vaultPwd}).Decode(&record)
-
-		s := storage.New(record, answers.Email)
-
-		json, err := json.Marshal(s)
+		err = CheckAuthorization(answers.Email, answers.MasterPassword)
 		if err != nil {
-			return fmt.Errorf("failed to marshal storage into struct : %w", err)
+			return err
 		}
+		var record bson.M
+		collection.FindOne(context.Background(), bson.M{"email": answers.Email}).Decode(&record)
 
-		fmt.Println(json)
-		sessionKey := make([]byte, 20)
-		fmt.Println("sessionKey")
-		crypt.EncryptFile("test.bin", json, string(sessionKey))
+		//s := storage.New(record, answers.Email)
 
-		test := crypt.DecryptFile("test.bin", string(sessionKey))
-		fmt.Println(string(test))
+		//json, err := json.Marshal(s)
+		//if err != nil {
+		//	return fmt.Errorf("failed to marshal storage into struct : %w", err)
+		//}
+
+		//sessionKey := make([]byte, 20)
+		//crypt.EncryptFile("test.bin", json, string(sessionKey))
+
+		//test := crypt.DecryptFile("test.bin", string(sessionKey))
+		//fmt.Println(string(test))
 
 		//sync data
 		/*b, err := json.Marshal(&record)
@@ -116,8 +100,25 @@ func setSessionKey() {
 
 }
 
-/*
-func encryptFile(sessionKey []byte, masterPassword []byte, vault storage) {
+func CheckAuthorization(email string, password string) error {
+	db := struct {
+		Email string `bson:"email"`
+	}{}
+
+	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&db)
+	fmt.Printf("e: %s", db.Email)
+	if db.Email == "" || string(email) != db.Email {
+		return errors.New("failed to find this account")
+	}
+
+	var record bson.M
+	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
+	vaultPwd := argon2.IDKey([]byte(password), []byte(email), 1, 64*1024, 4, 32)
+
+	_, err := crypt.Decrypt(record["vault"].(primitive.Binary).Data, vaultPwd)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt data value: %w ", err)
+	}
+	return nil
 
 }
-*/

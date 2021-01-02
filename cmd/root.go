@@ -42,8 +42,8 @@ func init() {
 		log.Fatal(err)
 	}
 
-	db := client.Database("quickstart")
-	collection = db.Collection("podcasts")
+	db := client.Database("manager")
+	collection = db.Collection("users")
 
 	//defer client.Disconnect(ctx)
 }

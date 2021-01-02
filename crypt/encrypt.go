@@ -3,62 +3,75 @@ package crypt
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
 	"crypto/rand"
-	"encoding/hex"
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
 )
 
-func createHash(key string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(key))
-	return hex.EncodeToString(hasher.Sum(nil))
-}
-
-func encrypt(data []byte, passphrase string) []byte {
-	block, _ := aes.NewCipher([]byte(createHash(passphrase)))
-	gcm, err := cipher.NewGCM(block)
+//Encrypt encrypts data by given passphrase
+func Encrypt(data []byte, key []byte) ([]byte, error) {
+	c, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
+
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		return nil, err
+	}
+
 	nonce := make([]byte, gcm.NonceSize())
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
+		return nil, err
 	}
-	ciphertext := gcm.Seal(nonce, nonce, data, nil)
-	return ciphertext
+
+	return gcm.Seal(nonce, nonce, data, nil), nil
 }
 
-func decrypt(data []byte, passphrase string) []byte {
-	key := []byte(createHash(passphrase))
-	block, err := aes.NewCipher(key)
+//Decrypt decrypts data by given passphrase
+func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
+	c, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
-	gcm, err := cipher.NewGCM(block)
+
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
+
 	nonceSize := gcm.NonceSize()
-	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
-	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-	if err != nil {
-		panic(err.Error())
+	if len(ciphertext) < nonceSize {
+		return nil, errors.New("ciphertext too short")
 	}
-	return plaintext
+
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	return gcm.Open(nil, nonce, ciphertext, nil)
 }
 
 // EncryptFile encripts given data with md5 algorithm and saves it to file.
-func EncryptFile(filename string, data []byte, passphrase string) {
+func EncryptFile(filename string, data []byte, key []byte) error {
 	f, _ := os.Create(filename)
 	defer f.Close()
-	f.Write(encrypt(data, passphrase))
+	byteEncrypted, err := Encrypt(data, key)
+	if err != nil {
+		return err
+	}
+
+	f.Write(byteEncrypted)
+	return nil
 }
 
 // DecryptFile decrypts file by given password
-func DecryptFile(filename string, passphrase string) []byte {
+func DecryptFile(filename string, key []byte) ([]byte, error) {
 	data, _ := ioutil.ReadFile(filename)
-	return decrypt(data, passphrase)
+
+	byteEncrypted, err := Decrypt(data, key)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return Decrypt(byteEncrypted, key)
 }

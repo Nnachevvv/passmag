@@ -51,7 +51,7 @@ func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 	return gcm.Open(nil, nonce, ciphertext, nil)
 }
 
-// EncryptFile encripts given data with md5 algorithm and saves it to file.
+// EncryptFile encripts given data with cypher algorithm and saves it to file.
 func EncryptFile(filename string, data []byte, key []byte) error {
 	f, _ := os.Create(filename)
 	defer f.Close()

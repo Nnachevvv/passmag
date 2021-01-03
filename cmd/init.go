@@ -14,11 +14,6 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-//TODO: maybe add email to db , cuz we cant check if it's exist
-// the questions to ask
-//https://www.lastpass.com/enterprise/security
-//https://www.reddit.com/r/learnpython/comments/a0u95u/password_manager_how_to_store_password_database/
-//https://www.reddit.com/r/AskNetsec/comments/75cuwl/are_password_managers_really_safe_how_do_they_work/
 var qs = []*survey.Question{
 	{
 		Name:   "email",
@@ -70,31 +65,29 @@ var initCmd = &cobra.Command{
 			MasterPassword  string
 			ConfirmPassword string
 		}{}
+
 		survey.Ask(qs, &answers)
 
-		fmt.Printf("Master : %s, Confirm : %s", answers.MasterPassword, answers.ConfirmPassword)
-
 		if answers.MasterPassword != answers.ConfirmPassword {
-			return errors.New("master password and confirmation password doesn't match")
+			return errors.New("passwords doesn't match")
 		}
 
-		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(answers.Email), 1, 64*1024, 4, 32)
-		var record bson.M
-		s := storage.New(record, answers.Email)
+		s := storage.New(bson.M{"email": answers.Email})
 
-		byteMap, err := json.Marshal(s)
+		byteData, err := json.Marshal(s)
 		if err != nil {
 			return fmt.Errorf("failed to marshal map : %w", err)
 		}
 
-		byteEncryptedData, err := crypt.Encrypt(byteMap, vaultPwd)
+		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(answers.Email), 1, 64*1024, 4, 32)
+		byteEncryptedData, err := crypt.Encrypt(byteData, vaultPwd)
 		if err != nil {
 			return fmt.Errorf("failed to encrypt your data: %w", err)
 		}
+
 		_, err = collection.InsertOne(ctx, bson.D{{Key: "email", Value: answers.Email},
 			{Key: "vault", Value: byteEncryptedData},
 		})
-		fmt.Println(string(byteEncryptedData))
 
 		if err != nil {
 			return fmt.Errorf("failed to create user : %w ", err)

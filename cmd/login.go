@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/nnachevv/passmag/crypt"
+	"github.com/nnachevv/passmag/storage"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
@@ -56,51 +58,35 @@ var loginCmd = &cobra.Command{
 			return err
 		}
 
-		err = CheckAuthorization(answers.Email, answers.MasterPassword)
+		decryptedVault, err := AuthAndGetVault(answers.Email, answers.MasterPassword)
 		if err != nil {
 			return err
 		}
-		var record bson.M
-		collection.FindOne(context.Background(), bson.M{"email": answers.Email}).Decode(&record)
 
-		//s := storage.New(record, answers.Email)
+		sessionKey := make([]byte, 32)
+		rand.Read(sessionKey)
+		fmt.Println(string("-------------"))
+		fmt.Println(string(string(sessionKey)))
+		fmt.Println(string(sessionKey))
+		fmt.Println(string("-------------"))
 
-		//json, err := json.Marshal(s)
-		//if err != nil {
-		//	return fmt.Errorf("failed to marshal storage into struct : %w", err)
-		//}
+		path := storage.OperatingSystem() + "vault.bin"
 
-		//sessionKey := make([]byte, 20)
-		//crypt.EncryptFile("test.bin", json, string(sessionKey))
-
-		//test := crypt.DecryptFile("test.bin", string(sessionKey))
-		//fmt.Println(string(test))
-
-		//sync data
-		/*b, err := json.Marshal(&record)
+		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), sessionKey, 1, 64*1024, 4, 32)
+		err = crypt.EncryptFile(path, decryptedVault, vaultPwd)
 		if err != nil {
-			panic(err) // it will be invoked
-			// panic: json: unsupported value: NaN
+			return fmt.Errorf("failed to encrypt sessionData : %w", err)
 		}
 
-		f, err := os.Create("data.txt")
+		fmt.Println("You're session key is : " + string(sessionKey) + "To unlock your vault\n" +
+			"set session key to `PASS_SESSION` enviroment variable like this: \n" +
+			"export PASS_SESSION=" + string(sessionKey))
 
-		f.WriteString(string(b))
-
-
-		fmt.Printf("Your sessionKey is %s", string(sessionKey))
-
-		//encrypt data
-		*/
 		return nil
 	},
 }
 
-func setSessionKey() {
-
-}
-
-func CheckAuthorization(email string, password string) error {
+func AuthAndGetVault(email string, password string) ([]byte, error) {
 	db := struct {
 		Email string `bson:"email"`
 	}{}
@@ -108,17 +94,17 @@ func CheckAuthorization(email string, password string) error {
 	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&db)
 	fmt.Printf("e: %s", db.Email)
 	if db.Email == "" || string(email) != db.Email {
-		return errors.New("failed to find this account")
+		return nil, errors.New("failed to find this account")
 	}
 
 	var record bson.M
 	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
 	vaultPwd := argon2.IDKey([]byte(password), []byte(email), 1, 64*1024, 4, 32)
 
-	_, err := crypt.Decrypt(record["vault"].(primitive.Binary).Data, vaultPwd)
+	encyrptedVault, err := crypt.Decrypt(record["vault"].(primitive.Binary).Data, vaultPwd)
 	if err != nil {
-		return fmt.Errorf("failed to decrypt data value: %w ", err)
+		return nil, fmt.Errorf("failed to decrypt data value: %w ", err)
 	}
-	return nil
+	return encyrptedVault, nil
 
 }

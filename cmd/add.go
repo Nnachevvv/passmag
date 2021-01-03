@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+
+	"github.com/nnachevv/passmag/crypt"
+	"github.com/nnachevv/passmag/storage"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -52,7 +56,7 @@ var addCmd = &cobra.Command{
 		*/
 
 		var sessionKey string
-		if !viper.IsSet("PASS_KEY") {
+		if !viper.IsSet("PASS_SESSION") {
 			prompt := &survey.Input{Message: "Please enter your session key :"}
 			survey.AskOne(prompt, &sessionKey, survey.WithValidator(survey.Required))
 		} else {
@@ -63,26 +67,23 @@ var addCmd = &cobra.Command{
 		prompt := &survey.Password{Message: "Enter your  master password:"}
 		survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
 
-		var email []byte
-		//storage.email()
-		vaultPwd := argon2.IDKey([]byte(masterPassword), []byte(email), 1, 64*1024, 4, 32)
+		vaultPwd := argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
+		path := storage.OperatingSystem() + "vault.bin"
+		vaultData, err := crypt.DecryptFile(path, vaultPwd)
+		if err != nil {
+			return err
+		}
+		var jsonVault map[string]interface{}
+		jsonVault[answers.Host] = answers.Password
 
-		//TODO :ssh
-		encryptHost := argon2.IDKey([]byte(vaultPwd), []byte(answers.Host), 1, 64*1024, 4, 32)
-
-		encryptPwd := argon2.IDKey([]byte(vaultPwd), []byte(answers.Password), 1, 64*1024, 4, 32)
-
-		_, err = collection.UpdateOne(
-			ctx,
-			bson.M{"email": vaultPwd},
-			bson.D{
-				{"$set", bson.D{{string(encryptHost), encryptPwd}}},
-			},
-		)
+		err = json.Unmarshal(vaultData, &jsonVault)
 		if err != nil {
 			return err
 		}
 
+		s := storage.New(jsonVault)
+		fmt.Println(s)
+		fmt.Println(jsonVault)
 		return nil
 	},
 }

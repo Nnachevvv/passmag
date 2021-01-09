@@ -1,6 +1,9 @@
 package storage
 
 import (
+	"errors"
+	"fmt"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -10,9 +13,9 @@ import (
 
 //Storage contains user email and - hashed host , encryped password in db
 type Storage struct {
-	Email       string
-	Passwords   map[string][]byte
-	TimeCreated time.Time
+	Email       string            `json:"type"`
+	Passwords   map[string][]byte `json:"passwords"`
+	TimeCreated time.Time         `json:"timecreated"`
 }
 
 // New creates a new Storage object from passed email adress and current hashed password in database
@@ -29,14 +32,21 @@ func New(data map[string]interface{}) Storage {
 }
 
 //OperatingSystem returns path for currently used operating system
-func OperatingSystem() string {
+func StorageFilePath() (string, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current user : %w", err)
+	}
+
 	switch os := runtime.GOOS; os {
 	case "windows":
-		return filepath.FromSlash("%Appdata%/PasswordManager")
+		windowsPath := filepath.Join(usr.HomeDir, "%Appdata%/PasswordManager/vault.bin")
+		return filepath.FromSlash(windowsPath), nil
 	case "linux":
-		return filepath.Join("/.config", "PasswordManager")
+		return filepath.Join(usr.HomeDir, "/.config", "PasswordManager", "vault.bin"), nil
 	case "darwin":
-		return filepath.Join("/Library", "Application Support", "PasswordManager")
+		return filepath.Join("/Library", "Application Support", "PasswordManager", "vault.bin"), nil
 	}
-	return ""
+
+	return "", errors.New("current OS is not supported")
 }

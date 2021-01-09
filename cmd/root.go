@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -44,7 +45,7 @@ func init() {
 
 	db := client.Database("manager")
 	collection = db.Collection("users")
-
+	viper.AutomaticEnv()
 	//defer client.Disconnect(ctx)
 }
 

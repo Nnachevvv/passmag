@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 //Encrypt encrypts data by given passphrase
@@ -53,7 +54,20 @@ func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 
 // EncryptFile encripts given data with cypher algorithm and saves it to file.
 func EncryptFile(filename string, data []byte, key []byte) error {
-	f, _ := os.Create(filename)
+	pathDir := filepath.Dir(filename)
+
+	if _, err := os.Stat(pathDir); os.IsNotExist(err) {
+		err := os.MkdirAll(pathDir, 0777)
+		if err != nil {
+			return err
+		}
+	}
+
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+
 	defer f.Close()
 	byteEncrypted, err := Encrypt(data, key)
 	if err != nil {
@@ -66,12 +80,15 @@ func EncryptFile(filename string, data []byte, key []byte) error {
 
 // DecryptFile decrypts file by given password
 func DecryptFile(filename string, key []byte) ([]byte, error) {
-	data, _ := ioutil.ReadFile(filename)
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return []byte{}, err
+	}
 
 	byteEncrypted, err := Decrypt(data, key)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	return Decrypt(byteEncrypted, key)
+	return byteEncrypted, nil
 }

@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"context"
-	"crypto/rand"
+	"math/rand"
+
 	"errors"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -63,16 +65,15 @@ var loginCmd = &cobra.Command{
 			return err
 		}
 
-		sessionKey := make([]byte, 32)
-		rand.Read(sessionKey)
-		fmt.Println(string("-------------"))
-		fmt.Println(string(string(sessionKey)))
-		fmt.Println(string(sessionKey))
-		fmt.Println(string("-------------"))
+		sessionKey := RandStringRunes(32)
 
-		path := storage.OperatingSystem() + "vault.bin"
+		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
 
-		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), sessionKey, 1, 64*1024, 4, 32)
+		path, err := storage.StorageFilePath()
+		if err != nil {
+			return err
+		}
+
 		err = crypt.EncryptFile(path, decryptedVault, vaultPwd)
 		if err != nil {
 			return fmt.Errorf("failed to encrypt sessionData : %w", err)
@@ -84,6 +85,20 @@ var loginCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
 
 func AuthAndGetVault(email string, password string) ([]byte, error) {

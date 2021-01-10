@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os/user"
@@ -31,8 +32,36 @@ func New(data map[string]interface{}) Storage {
 	return s
 }
 
-//OperatingSystem returns path for currently used operating system
-func StorageFilePath() (string, error) {
+// Load unmarshal json to Storage struct
+func Load(vaultData []byte) (Storage, error) {
+	var s Storage
+
+	err := json.Unmarshal(vaultData, &s)
+	if err != nil {
+		return Storage{}, fmt.Errorf("failed to unmarshal json to struct")
+	}
+
+	return s, nil
+}
+
+// Add add host and password if host doesn't exist
+func (s *Storage) Add(host, password string) error {
+	if _, ok := s.Passwords[host]; ok {
+		return errors.New("this host alredy exist")
+	}
+
+	s.Passwords[host] = []byte(password)
+	return nil
+}
+
+// Edit edits host and password
+func (s *Storage) Edit(host, password string) error {
+	s.Passwords[host] = []byte(password)
+	return nil
+}
+
+// FilePath returns path for currently used operating system
+func FilePath() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", fmt.Errorf("failed to get current user : %w", err)

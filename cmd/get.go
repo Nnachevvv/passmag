@@ -41,7 +41,7 @@ var getCmd = &cobra.Command{
 		survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
 
 		vaultPwd := argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
-		path, err := storage.StorageFilePath()
+		path, err := storage.FilePath()
 		if err != nil {
 			return err
 		}

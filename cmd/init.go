@@ -93,7 +93,7 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("failed to create user : %w ", err)
 		}
 
-		//TODO : add better output
+		fmt.Printf("%s is successfully created!\n", answers.Email)
 		return nil
 	},
 }

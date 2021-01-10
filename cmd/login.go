@@ -69,7 +69,7 @@ var loginCmd = &cobra.Command{
 
 		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
 
-		path, err := storage.StorageFilePath()
+		path, err := storage.FilePath()
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ var loginCmd = &cobra.Command{
 			return fmt.Errorf("failed to encrypt sessionData : %w", err)
 		}
 
-		fmt.Println("You're session key is : " + string(sessionKey) + "To unlock your vault\n" +
+		fmt.Println("You're session key is : " + string(sessionKey) + ". To unlock your vault\n" +
 			"set session key to `PASS_SESSION` enviroment variable like this: \n" +
 			"export PASS_SESSION=" + string(sessionKey))
 
@@ -102,18 +102,12 @@ func RandStringRunes(n int) string {
 }
 
 func AuthAndGetVault(email string, password string) ([]byte, error) {
-	db := struct {
-		Email string `bson:"email"`
-	}{}
-
-	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&db)
-	fmt.Printf("e: %s", db.Email)
-	if db.Email == "" || string(email) != db.Email {
+	var record bson.M
+	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
+	if record["email"] == "" || string(email) != record["email"] {
 		return nil, errors.New("failed to find this account")
 	}
 
-	var record bson.M
-	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
 	vaultPwd := argon2.IDKey([]byte(password), []byte(email), 1, 64*1024, 4, 32)
 
 	encyrptedVault, err := crypt.Decrypt(record["vault"].(primitive.Binary).Data, vaultPwd)

@@ -32,6 +32,7 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(editCmd)
 
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
 	if err != nil {

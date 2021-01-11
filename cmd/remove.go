@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -13,19 +12,11 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// the questions to ask
-var getQs = []*survey.Question{
-	{
-		Name:   "host",
-		Prompt: &survey.Input{Message: "Enter host for which you want to get password:"},
-	},
-}
+var removeCmd = &cobra.Command{
 
-var getCmd = &cobra.Command{
-
-	Use:   "get",
-	Short: "Initialize email, password and master password for your password manager",
-	Long:  `Set master password`,
+	Use:   "remove",
+	Short: "Remove password from your password manager",
+	Long:  `Remove password from your password manager`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path, err := storage.FilePath()
 		if err != nil {
@@ -45,39 +36,56 @@ var getCmd = &cobra.Command{
 		}
 
 		var masterPassword string
-		prompt := &survey.Password{Message: "Enter your  master password:"}
+		prompt := &survey.Password{Message: "Enter your master password:"}
 		survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
 
 		vaultPwd := argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
 
 		vaultData, err := crypt.DecryptFile(path, vaultPwd)
-
 		if err != nil {
 			return err
 		}
 
-		var s storage.Storage
-
-		err = json.Unmarshal(vaultData, &s)
+		err = removePassword(vaultData, path, vaultPwd)
 		if err != nil {
 			return err
 		}
 
-		answers := struct {
-			Host string
-		}{}
-
-		err = survey.Ask(getQs, &answers)
-		if err != nil {
-			return err
-		}
-
-		if _, ok := s.Passwords[answers.Host]; !ok {
-			return errors.New("failed to find this password")
-		}
-
-		fmt.Println(string(s.Passwords[answers.Host]))
+		fmt.Println("succesfully removed password")
 
 		return nil
 	},
+}
+
+func removePassword(vaultData []byte, path string, vaultPwd []byte) error {
+	var hostRemove string
+	prompt := &survey.Password{Message: "Enter for which URL you want to remove password:"}
+	survey.AskOne(prompt, &hostRemove, survey.WithValidator(survey.Required))
+
+	err := survey.AskOne(prompt, &hostRemove)
+	if err != nil {
+		return err
+	}
+
+	s, err := storage.Load(vaultData)
+	if err != nil {
+		return err
+	}
+
+	err = s.Remove(hostRemove)
+	if err != nil {
+		return err
+	}
+
+	byteData, err := json.Marshal(s)
+	if err != nil {
+		return fmt.Errorf("failed to marshal map : %w", err)
+	}
+
+	err = crypt.EncryptFile(path, byteData, vaultPwd)
+
+	if err != nil {
+		return fmt.Errorf("failed to encrypt sessionData : %w", err)
+	}
+	return nil
 }

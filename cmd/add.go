@@ -38,6 +38,15 @@ var addCmd = &cobra.Command{
 	Short: "Initialize email, password and master password for your password manager",
 	Long:  `Set master password`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		path, err := storage.FilePath()
+		if err != nil {
+			return err
+		}
+
+		if err := storage.VaultExist(path); err != nil {
+			return err
+		}
+
 		var sessionKey string
 		if !viper.IsSet("PASS_SESSION") {
 			prompt := &survey.Input{Message: "Please enter your session key :"}
@@ -52,17 +61,15 @@ var addCmd = &cobra.Command{
 
 		vaultPwd := argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
 
-		path, err := storage.FilePath()
-		if err != nil {
-			return err
-		}
-
 		vaultData, err := crypt.DecryptFile(path, vaultPwd)
 		if err != nil {
 			return err
 		}
 
-		addPasswords(vaultData, path, vaultPwd)
+		err = addPasswords(vaultData, path, vaultPwd)
+		if err != nil {
+			return err
+		}
 
 		fmt.Println("succesfully added")
 

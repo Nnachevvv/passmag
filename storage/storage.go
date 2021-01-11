@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -54,6 +55,16 @@ func (s *Storage) Add(host, password string) error {
 	return nil
 }
 
+// Remove remove host and password from password manager
+func (s *Storage) Remove(host string) error {
+	if _, ok := s.Passwords[host]; ok {
+		return errors.New("this host not exist in our db")
+	}
+
+	delete(s.Passwords, host)
+	return nil
+}
+
 // Edit edits host and password
 func (s *Storage) Edit(host, password string) error {
 	s.Passwords[host] = []byte(password)
@@ -78,4 +89,13 @@ func FilePath() (string, error) {
 	}
 
 	return "", errors.New("current OS is not supported")
+}
+
+// VaultExist check if given vault is present in path
+func VaultExist(path string) error {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return errors.New("please login first")
+	}
+	return nil
 }

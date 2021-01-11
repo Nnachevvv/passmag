@@ -54,7 +54,7 @@ var qs = []*survey.Question{
 	},
 }
 
-var init = &cobra.Command{
+var initialize = &cobra.Command{
 
 	Use:   "init",
 	Short: "Initialize email, password and master password for your password manager",

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-var removeCmd = &cobra.Command{
+var remove = &cobra.Command{
 
 	Use:   "remove",
 	Short: "Remove password from your password manager",
@@ -58,11 +58,11 @@ var removeCmd = &cobra.Command{
 }
 
 func removePassword(vaultData []byte, path string, vaultPwd []byte) error {
-	var hostRemove string
+	var removeName string
 	prompt := &survey.Password{Message: "Enter for which URL you want to remove password:"}
-	survey.AskOne(prompt, &hostRemove, survey.WithValidator(survey.Required))
+	survey.AskOne(prompt, &removeName, survey.WithValidator(survey.Required))
 
-	err := survey.AskOne(prompt, &hostRemove)
+	err := survey.AskOne(prompt, &removeName)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func removePassword(vaultData []byte, path string, vaultPwd []byte) error {
 		return err
 	}
 
-	err = s.Remove(hostRemove)
+	err = s.Remove(removeName)
 	if err != nil {
 		return err
 	}

@@ -28,11 +28,13 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
-	rootCmd.AddCommand(initCmd)
-	rootCmd.AddCommand(addCmd)
-	rootCmd.AddCommand(getCmd)
-	rootCmd.AddCommand(editCmd)
+	rootCmd.AddCommand(login)
+	rootCmd.AddCommand(init)
+	rootCmd.AddCommand(remove)
+	rootCmd.AddCommand(add)
+	rootCmd.AddCommand(get)
+	rootCmd.AddCommand(edit)
+	rootCmd.AddCommand(change)
 	rootCmd.AddCommand(logout)
 
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))

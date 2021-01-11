@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -13,21 +14,28 @@ import (
 )
 
 // the questions to ask
-var editQs = []*survey.Question{
+var changeQs = []*survey.Question{
 	{
 		Name:   "name",
-		Prompt: &survey.Input{Message: "Enter name for which you want to change password:"},
+		Prompt: &survey.Input{Message: "Enter name for which you want to edit your password adress:"},
 	},
 	{
-		Name:   "newname",
-		Prompt: &survey.Input{Message: "Enter new name for your password:"},
+		Name:   "password",
+		Prompt: &survey.Password{Message: "Enter new password:"},
+		Validate: func(val interface{}) error {
+			if str, ok := val.(string); !ok || len(str) < 8 {
+				return errors.New("password should be longer than 8 characters")
+			}
+			return nil
+		},
 	},
 }
 
-var edit = &cobra.Command{
-	Use:   "edit",
-	Short: "Initialize email, password and master password for your password manager",
-	Long:  `Set master password`,
+var change = &cobra.Command{
+
+	Use:   "change",
+	Short: "Change password for given host",
+	Long:  `Change password for given host`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path, err := storage.FilePath()
 		if err != nil {
@@ -47,7 +55,7 @@ var edit = &cobra.Command{
 		}
 
 		var masterPassword string
-		prompt := &survey.Password{Message: "Enter your  master password:"}
+		prompt := &survey.Password{Message: "Enter your master password:"}
 		survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
 
 		vaultPwd := argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
@@ -66,26 +74,30 @@ var edit = &cobra.Command{
 		}
 
 		answers := struct {
-			Name    string
-			NewName string
+			Name     string
+			Password string
 		}{}
 
-		pwd, err := s.Get(answers.Name)
+		err = survey.Ask(changeQs, &answers)
 		if err != nil {
 			return err
 		}
 
-		err = s.Remove(answers.Name)
-		if err != nil {
-			return err
+		if _, ok := s.Passwords[answers.Name]; !ok {
+			return errors.New("failed to find this name")
 		}
 
-		err = s.Add(answers.NewName, pwd)
+		s.Edit(answers.Name, answers.Password)
+		byteData, err := json.Marshal(s)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to marshal map : %w", err)
 		}
-		fmt.Println("succesfuly moved your password")
 
+		err = crypt.EncryptFile(path, byteData, vaultPwd)
+
+		if err != nil {
+			return fmt.Errorf("failed to encrypt sessionData : %w", err)
+		}
 		return nil
 	},
 }

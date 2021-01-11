@@ -17,8 +17,8 @@ import (
 // the questions to ask
 var addQs = []*survey.Question{
 	{
-		Name:   "host",
-		Prompt: &survey.Input{Message: "Enter host adress:"},
+		Name:   "name",
+		Prompt: &survey.Input{Message: "Enter name adress:"},
 	},
 	{
 		Name:   "password",
@@ -32,7 +32,7 @@ var addQs = []*survey.Question{
 	},
 }
 
-var addCmd = &cobra.Command{
+var add = &cobra.Command{
 
 	Use:   "add",
 	Short: "Initialize email, password and master password for your password manager",
@@ -79,7 +79,7 @@ var addCmd = &cobra.Command{
 
 func addPasswords(vaultData []byte, path string, vaultPwd []byte) error {
 	answers := struct {
-		Host     string
+		Name     string
 		Password string
 	}{}
 
@@ -93,13 +93,13 @@ func addPasswords(vaultData []byte, path string, vaultPwd []byte) error {
 		return err
 	}
 
-	err = s.Add(answers.Host, answers.Password)
+	err = s.Add(answers.Name, answers.Password)
 	if err != nil {
 		var confirm bool
-		editConfirm := &survey.Confirm{Message: "Do you want to edit host with newly password"}
+		editConfirm := &survey.Confirm{Message: "Do you want to edit name with newly password"}
 		survey.AskOne(editConfirm, &confirm, survey.WithValidator(survey.Required))
 		if confirm {
-			s.Edit(answers.Host, answers.Password)
+			s.Edit(answers.Name, answers.Password)
 		}
 		return nil
 	}

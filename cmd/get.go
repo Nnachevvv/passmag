@@ -13,19 +13,11 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// the questions to ask
-var getQs = []*survey.Question{
-	{
-		Name:   "host",
-		Prompt: &survey.Input{Message: "Enter host for which you want to get password:"},
-	},
-}
-
-var getCmd = &cobra.Command{
+var get = &cobra.Command{
 
 	Use:   "get",
-	Short: "Initialize email, password and master password for your password manager",
-	Long:  `Set master password`,
+	Short: "Get password from your vault",
+	Long:  `Get passwword if exist from your vault`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path, err := storage.FilePath()
 		if err != nil {
@@ -63,20 +55,20 @@ var getCmd = &cobra.Command{
 			return err
 		}
 
-		answers := struct {
-			Host string
-		}{}
+		var name string
 
-		err = survey.Ask(getQs, &answers)
+		namePrompt := &survey.Input{Message: "Enter name for which you want to get password:"}
+
+		err = survey.AskOne(namePrompt, &name)
 		if err != nil {
 			return err
 		}
 
-		if _, ok := s.Passwords[answers.Host]; !ok {
+		if _, ok := s.Passwords[name]; !ok {
 			return errors.New("failed to find this password")
 		}
 
-		fmt.Println(string(s.Passwords[answers.Host]))
+		fmt.Println(string(s.Passwords[name]))
 
 		return nil
 	},

@@ -13,14 +13,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-//Storage contains user email and - hashed host , encryped password in db
+//Storage contains user email and - names with password
 type Storage struct {
 	Email       string            `json:"type"`
 	Passwords   map[string][]byte `json:"passwords"`
 	TimeCreated time.Time         `json:"timecreated"`
 }
 
-// New creates a new Storage object from passed email adress and current hashed password in database
+// New creates a new Storage object from passed email adress and current encrypted password in database
 func New(data map[string]interface{}) Storage {
 	s := Storage{TimeCreated: time.Now(), Email: data["email"].(string)}
 
@@ -45,30 +45,38 @@ func Load(vaultData []byte) (Storage, error) {
 	return s, nil
 }
 
-// Add add host and password if host doesn't exist
-func (s *Storage) Add(host, password string) error {
-	if _, ok := s.Passwords[host]; ok {
-		return errors.New("this host alredy exist")
+// Add adds name and password if name doesn't exist
+func (s *Storage) Add(name, password string) error {
+	if _, ok := s.Passwords[name]; ok {
+		return errors.New("this name alredy exist")
 	}
 
-	s.Passwords[host] = []byte(password)
+	s.Passwords[name] = []byte(password)
 	return nil
 }
 
-// Remove remove host and password from password manager
-func (s *Storage) Remove(host string) error {
-	if _, ok := s.Passwords[host]; ok {
-		return errors.New("this host not exist in our db")
+// Remove remove name and password from password manager
+func (s *Storage) Remove(name string) error {
+	if _, ok := s.Passwords[name]; !ok {
+		return errors.New("this name not exist in our db")
 	}
 
-	delete(s.Passwords, host)
+	delete(s.Passwords, name)
 	return nil
 }
 
-// Edit edits host and password
-func (s *Storage) Edit(host, password string) error {
-	s.Passwords[host] = []byte(password)
-	return nil
+// Get gets password if exist from given name
+func (s *Storage) Get(name string) (string, error) {
+	if _, ok := s.Passwords[name]; !ok {
+		return "", errors.New("this name not exist in your password manager ")
+	}
+
+	return string(s.Passwords[name]), nil
+}
+
+// Edit edits password
+func (s *Storage) Edit(name, password string) {
+	s.Passwords[name] = []byte(password)
 }
 
 // FilePath returns path for currently used operating system

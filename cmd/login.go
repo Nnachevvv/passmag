@@ -45,7 +45,7 @@ var loginQs = []*survey.Question{
 	},
 }
 
-var loginCmd = &cobra.Command{
+var login = &cobra.Command{
 	Use:   "login",
 	Short: "login to password manager CLI",
 	Long:  "login to password manager CLI and seal vault locally with generated random decription key",

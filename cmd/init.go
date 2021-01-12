@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
@@ -20,10 +19,10 @@ var qs = []*survey.Question{
 			if !ok || len(email) < 8 {
 				return errors.New("email should be longer than 8 characters")
 			}
-			var record bson.M
 
-			collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
-			if record != nil {
+			_, err := service.Find(email)
+
+			if err != nil {
 				return fmt.Errorf("email adress %s exist in our database", email)
 			}
 			return nil

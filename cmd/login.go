@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"math/rand"
 
 	"errors"
@@ -15,7 +14,6 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
-	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -102,18 +100,16 @@ func RandStringRunes(n int) string {
 }
 
 func AuthAndGetVault(email string, password string) ([]byte, error) {
-	var record bson.M
-	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
-	if record["email"] == "" || string(email) != record["email"] {
-		return nil, errors.New("failed to find this account")
+	doc, err := service.Find(email)
+	if err != nil {
+		return nil, err
 	}
-
 	vaultPwd := argon2.IDKey([]byte(password), []byte(email), 1, 64*1024, 4, 32)
 
-	encyrptedVault, err := crypt.Decrypt(record["vault"].(primitive.Binary).Data, vaultPwd)
+	encryptedVault, err := crypt.Decrypt(doc["vault"].(primitive.Binary).Data, vaultPwd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt data value: %w ", err)
 	}
-	return encyrptedVault, nil
+	return encryptedVault, nil
 
 }

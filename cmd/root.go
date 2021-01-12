@@ -9,6 +9,7 @@ import (
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -33,7 +34,9 @@ func init() {
 	rootCmd.AddCommand(edit)
 	rootCmd.AddCommand(change)
 	rootCmd.AddCommand(logout)
-
+	rootCmd.AddCommand(list)
+	service.Connect()
+	viper.AutomaticEnv()
 	//defer client.Disconnect(ctx)
 }
 

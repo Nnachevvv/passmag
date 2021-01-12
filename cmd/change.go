@@ -67,7 +67,7 @@ var change = &cobra.Command{
 			return fmt.Errorf("failed to marshal map : %w", err)
 		}
 
-		err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd())
+		err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
 
 		if err != nil {
 			return fmt.Errorf("failed to encrypt sessionData : %w", err)

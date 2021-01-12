@@ -12,27 +12,10 @@ import (
 
 // User contains current logged user
 type User struct {
-	Password   []byte
-	SessionKey []byte
-	VaultPath  string
-	VaultData  []byte
-}
-
-// VaultPwd returns vault password for given user
-func (u *User) VaultPwd() []byte {
-	vaultPwd := argon2.IDKey(u.Password, u.SessionKey, 1, 64*1024, 4, 32)
-	return vaultPwd
-}
-
-// LoadVault load current vualt from user directory
-func (u *User) LoadVault() error {
-	vaultData, err := crypt.DecryptFile(u.VaultPath, u.VaultPwd())
-	if err != nil {
-		return fmt.Errorf("failed to load your vault try again : %w", err)
-	}
-
-	u.VaultData = vaultData
-	return nil
+	Password  []byte
+	VaultPwd  []byte
+	VaultPath string
+	VaultData []byte
 }
 
 //EnterSession prompts to enter Session Key and ask for master password
@@ -58,14 +41,24 @@ func EnterSession() (User, error) {
 	prompt := &survey.Password{Message: "Enter your  master password:"}
 	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
 	u := User{
-		Password:   []byte(masterPassword),
-		SessionKey: []byte(sessionKey),
-		VaultPath:  path}
+		Password:  []byte(masterPassword),
+		VaultPwd:  argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32),
+		VaultPath: path}
 
-	err = u.LoadVault()
+	err = u.loadVault()
 	if err != nil {
 		return User{}, err
 	}
 
 	return u, err
+}
+
+func (u *User) loadVault() error {
+	vaultData, err := crypt.DecryptFile(u.VaultPath, u.VaultPwd)
+	if err != nil {
+		return fmt.Errorf("failed to load your vault try again : %w", err)
+	}
+
+	u.VaultData = vaultData
+	return nil
 }

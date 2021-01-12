@@ -7,7 +7,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -19,11 +18,12 @@ type Service struct {
 }
 
 //Connect connects to mongoDB
-func Connect() {
+func (s *Service) Connect() {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
+	s.client = client
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -32,7 +32,6 @@ func Connect() {
 		log.Fatal(err)
 	}
 
-	viper.AutomaticEnv()
 }
 
 // Insert wraps InsertOne command from mongodb Driver and insert email and vault to db

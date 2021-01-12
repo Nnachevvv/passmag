@@ -21,7 +21,7 @@ import (
 var loginQs = []*survey.Question{
 	{
 		Name:   "email",
-		Prompt: &survey.Input{Message: "Enter your email adress:"},
+		Prompt: &survey.Input{Message: "Enter your email address:"},
 		Validate: func(val interface{}) error {
 			email, ok := val.(string)
 			if !ok || len(email) < 8 {
@@ -46,7 +46,7 @@ var loginQs = []*survey.Question{
 var login = &cobra.Command{
 	Use:   "login",
 	Short: "login to password manager CLI",
-	Long:  "login to password manager CLI and seal vault locally with generated random decription key",
+	Long:  "login to password manager CLI and seal vault locally with generated random description key",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		answers := struct {
 			Email          string
@@ -78,7 +78,7 @@ var login = &cobra.Command{
 		}
 
 		fmt.Println("You're session key is : " + string(sessionKey) + ". To unlock your vault\n" +
-			"set session key to `PASS_SESSION` enviroment variable like this: \n" +
+			"set session key to `PASS_SESSION` environment variable like this: \n" +
 			"export PASS_SESSION=" + string(sessionKey))
 
 		return nil

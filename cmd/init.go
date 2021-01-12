@@ -2,16 +2,13 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/crypto/argon2"
 )
 
 var qs = []*survey.Question{
@@ -74,23 +71,9 @@ var initialize = &cobra.Command{
 
 		s := storage.New(bson.M{"email": answers.Email})
 
-		byteData, err := json.Marshal(s)
+		err := SyncVault(s, []byte(answers.MasterPassword))
 		if err != nil {
-			return fmt.Errorf("failed to marshal map : %w", err)
-		}
-
-		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(answers.Email), 1, 64*1024, 4, 32)
-		byteEncryptedData, err := crypt.Encrypt(byteData, vaultPwd)
-		if err != nil {
-			return fmt.Errorf("failed to encrypt your data: %w", err)
-		}
-
-		_, err = collection.InsertOne(ctx, bson.D{{Key: "email", Value: answers.Email},
-			{Key: "vault", Value: byteEncryptedData},
-		})
-
-		if err != nil {
-			return fmt.Errorf("failed to create user : %w ", err)
+			return err
 		}
 
 		fmt.Printf("%s is successfully created!\n", answers.Email)

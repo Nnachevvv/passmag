@@ -8,6 +8,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
+	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
@@ -35,13 +36,13 @@ var change = &cobra.Command{
 	Short: "Change password for given host",
 	Long:  `Change password for given host`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		vaultData, vaultPwd, path, err := EnterSession()
+		u, err := user.EnterSession()
 		if err != nil {
 			return err
 		}
 		var s storage.Storage
 
-		err = json.Unmarshal(vaultData, &s)
+		err = json.Unmarshal(u.VaultData, &s)
 		if err != nil {
 			return err
 		}
@@ -66,11 +67,17 @@ var change = &cobra.Command{
 			return fmt.Errorf("failed to marshal map : %w", err)
 		}
 
-		err = crypt.EncryptFile(path, byteData, vaultPwd)
+		err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd())
 
 		if err != nil {
 			return fmt.Errorf("failed to encrypt sessionData : %w", err)
 		}
+
+		err = SyncVault(s, u.Password)
+		if err != nil && err != ErrCreateUser {
+			return err
+		}
+
 		return nil
 	},
 }

@@ -12,7 +12,7 @@ var logout = &cobra.Command{
 
 	Use:   "logout",
 	Short: "Logout from logged user",
-	Long:  `Logout from logged user and deleate currently downoload vault`,
+	Long:  `Logout from logged user and deleate currently download vault`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path, err := storage.FilePath()
 		if err != nil {

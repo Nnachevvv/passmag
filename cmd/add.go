@@ -7,6 +7,7 @@ import (
 
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
+	"github.com/nnachevv/passmag/user"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
@@ -36,12 +37,12 @@ var add = &cobra.Command{
 	Short: "Initialize email, password and master password for your password manager",
 	Long:  `Set master password`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		vaultData, vaultPwd, path, err := EnterSession()
+		u, err := user.EnterSession()
 		if err != nil {
 			return err
 		}
 
-		err = addPasswords(vaultData, path, vaultPwd)
+		err = addPasswords(u)
 		if err != nil {
 			return err
 		}
@@ -52,7 +53,7 @@ var add = &cobra.Command{
 	},
 }
 
-func addPasswords(vaultData []byte, path string, vaultPwd []byte) error {
+func addPasswords(u user.User) error {
 	answers := struct {
 		Name     string
 		Password string
@@ -63,7 +64,7 @@ func addPasswords(vaultData []byte, path string, vaultPwd []byte) error {
 		return err
 	}
 
-	s, err := storage.Load(vaultData)
+	s, err := storage.Load(u.VaultData)
 	if err != nil {
 		return err
 	}
@@ -84,10 +85,16 @@ func addPasswords(vaultData []byte, path string, vaultPwd []byte) error {
 		return fmt.Errorf("failed to marshal map : %w", err)
 	}
 
-	err = crypt.EncryptFile(path, byteData, vaultPwd)
+	err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd())
 
 	if err != nil {
 		return fmt.Errorf("failed to encrypt sessionData : %w", err)
 	}
+
+	err = SyncVault(s, u.Password)
+	if err != nil && err != ErrCreateUser {
+		return err
+	}
+
 	return nil
 }

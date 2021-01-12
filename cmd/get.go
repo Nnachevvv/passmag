@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/nnachevv/passmag/storage"
+	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
@@ -16,14 +17,14 @@ var get = &cobra.Command{
 	Short: "Get password from your vault",
 	Long:  `Get passwword if exist from your vault`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		vaultData, _, _, err := EnterSession()
+		u, err := user.EnterSession()
 		if err != nil {
 			return err
 		}
 
 		var s storage.Storage
 
-		err = json.Unmarshal(vaultData, &s)
+		err = json.Unmarshal(u.VaultData, &s)
 		if err != nil {
 			return err
 		}

@@ -2,16 +2,19 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"time"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/argon2"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -62,35 +65,29 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-func EnterSession() ([]byte, []byte, string, error) {
-	path, err := storage.FilePath()
+// ErrCreateUser throw by db when try to insert user
+var ErrCreateUser = errors.New("failed to add user to db")
+
+// SyncVault syncs current state of vault to password if internet connection is provided
+func SyncVault(s storage.Storage, password []byte) error {
+	byteData, err := json.Marshal(s)
 	if err != nil {
-		return nil, nil, "", err
+		return fmt.Errorf("failed to marshal map : %w", err)
 	}
 
-	if err := storage.VaultExist(path); err != nil {
-		return nil, nil, "", err
+	vaultPwd := argon2.IDKey([]byte(s.Email), password, 1, 64*1024, 4, 32)
+	byteEncryptedData, err := crypt.Encrypt(byteData, vaultPwd)
+	if err != nil {
+		return fmt.Errorf("failed to add user to db", err)
 	}
 
-	var sessionKey string
-	if !viper.IsSet("PASS_SESSION") {
-		prompt := &survey.Input{Message: "Please enter your session key :"}
-		survey.AskOne(prompt, &sessionKey, survey.WithValidator(survey.Required))
-	} else {
-		sessionKey = viper.GetString("PASS_SESSION")
-	}
-
-	var masterPassword string
-	prompt := &survey.Password{Message: "Enter your  master password:"}
-	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
-
-	vaultPwd := argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
-
-	vaultData, err := crypt.DecryptFile(path, vaultPwd)
+	_, err = collection.InsertOne(ctx, bson.D{{Key: "email", Value: s.Email},
+		{Key: "vault", Value: byteEncryptedData},
+	})
 
 	if err != nil {
-		return nil, nil, "", err
+		return ErrCreateUser
 	}
 
-	return vaultData, vaultPwd, path, err
+	return nil
 }

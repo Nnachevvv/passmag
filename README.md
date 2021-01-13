@@ -28,6 +28,12 @@ Additionally, you can run the --help option on a specific command to learn more 
 ## Detailed documentation
 
 `passmag init` - allows any user to register for the Password manager vault service.
+
 `passmag login` - login in your registred user.  After successfully logging into the CLI a session key will be returned. This session key is necessary to perform any commands that require your vault to be unlocked (list, get, edit, etc.).
+
 `passmag add` - add command allows you to add new name and password in your vault.
+
+`passmag edit` - allows to edit your added password
+
+`passmag get` - get password from already added passwords
 

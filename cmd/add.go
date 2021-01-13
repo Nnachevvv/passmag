@@ -17,7 +17,7 @@ import (
 var addQs = []*survey.Question{
 	{
 		Name:   "name",
-		Prompt: &survey.Input{Message: "Enter name adress:"},
+		Prompt: &survey.Input{Message: "Enter name for your password:"},
 	},
 	{
 		Name:   "password",
@@ -46,7 +46,7 @@ var add = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Println("succesfully added")
+		fmt.Println("successfully added")
 
 		return nil
 	},
@@ -58,9 +58,17 @@ func addPasswords(u user.User) error {
 		Password string
 	}{}
 
-	err := survey.Ask(addQs, &answers)
-	if err != nil {
-		return err
+	namePrompt := &survey.Input{Message: "Enter name for your password:"}
+	survey.AskOne(namePrompt, &answers.Name, survey.WithValidator(survey.Required))
+
+	var confirm bool
+	generateConfirm := &survey.Confirm{Message: "Do you want to automatically generate password?"}
+	survey.AskOne(generateConfirm, &confirm, survey.WithValidator(survey.Required))
+	if confirm {
+		answers.Password = RandStringRunes(32)
+	} else {
+		passwordPrompt := &survey.Password{Message: "Enter your password:"}
+		survey.AskOne(passwordPrompt, &answers.Password, survey.WithValidator(survey.Required))
 	}
 
 	s, err := storage.Load(u.VaultData)
@@ -70,8 +78,7 @@ func addPasswords(u user.User) error {
 
 	err = s.Add(answers.Name, answers.Password)
 	if err != nil {
-		var confirm bool
-		editConfirm := &survey.Confirm{Message: "Do you want to edit name with newly password"}
+		editConfirm := &survey.Confirm{Message: "This name with password already exist! Do you want to edit name with newly password"}
 		survey.AskOne(editConfirm, &confirm, survey.WithValidator(survey.Required))
 		if confirm {
 			s.Edit(answers.Name, answers.Password)

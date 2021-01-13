@@ -13,7 +13,7 @@ import (
 var qs = []*survey.Question{
 	{
 		Name:   "email",
-		Prompt: &survey.Input{Message: "Enter your email adress:"},
+		Prompt: &survey.Input{Message: "Enter your email address:"},
 		Validate: func(val interface{}) error {
 			email, ok := val.(string)
 			if !ok || len(email) < 8 {
@@ -23,7 +23,7 @@ var qs = []*survey.Question{
 			_, err := service.Find(email)
 
 			if err != nil {
-				return fmt.Errorf("email adress %s exist in our database", email)
+				return fmt.Errorf("email address %s exist in our database", email)
 			}
 			return nil
 		},

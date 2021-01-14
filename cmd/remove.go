@@ -15,7 +15,7 @@ var remove = &cobra.Command{
 
 	Use:   "remove",
 	Short: "Remove password from your password manager",
-	Long:  `Remove password from your password manager`,
+	Long:  `Remove password from your password manager from given host`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		u, err := user.EnterSession()
 		if err != nil {
@@ -35,7 +35,7 @@ var remove = &cobra.Command{
 
 func removePassword(u user.User) error {
 	var removeName string
-	prompt := &survey.Password{Message: "Enter for which URL you want to remove password:"}
+	prompt := &survey.Password{Message: "Enter for which Name you want to remove password:"}
 	survey.AskOne(prompt, &removeName, survey.WithValidator(survey.Required))
 
 	err := survey.AskOne(prompt, &removeName)

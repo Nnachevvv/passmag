@@ -42,7 +42,7 @@ var add = &cobra.Command{
 			return err
 		}
 
-		err = addPasswords(u)
+		err = addPassword(u)
 		if err != nil {
 			return err
 		}
@@ -52,23 +52,16 @@ var add = &cobra.Command{
 	},
 }
 
-func addPasswords(u user.User) error {
-	answers := struct {
-		Name     string
-		Password string
-	}{}
+func addPassword(u user.User) error {
+
+	var name string
 
 	namePrompt := &survey.Input{Message: "Enter name for your password:"}
-	survey.AskOne(namePrompt, &answers.Name, survey.WithValidator(survey.Required))
+	survey.AskOne(namePrompt, &name, survey.WithValidator(survey.Required))
 
-	var confirm bool
-	generateConfirm := &survey.Confirm{Message: "Do you want to automatically generate password?"}
-	survey.AskOne(generateConfirm, &confirm, survey.WithValidator(survey.Required))
-	if confirm {
-		answers.Password = RandStringRunes(32)
-	} else {
-		passwordPrompt := &survey.Password{Message: "Enter your password:"}
-		survey.AskOne(passwordPrompt, &answers.Password, survey.WithValidator(survey.Required))
+	password, err := processPassword()
+	if err != nil {
+		return err
 	}
 
 	s, err := storage.Load(u.VaultData)
@@ -76,14 +69,15 @@ func addPasswords(u user.User) error {
 		return err
 	}
 
-	err = s.Add(answers.Name, answers.Password)
+	err = s.Add(name, password)
 	if err != nil {
+		var confirm bool
 		editConfirm := &survey.Confirm{Message: "This name with password already exist! Do you want to edit name with newly password"}
 		survey.AskOne(editConfirm, &confirm, survey.WithValidator(survey.Required))
-		if confirm {
-			s.Edit(answers.Name, answers.Password)
+		if !confirm {
+			return nil
 		}
-		return nil
+		s.Edit(name, password)
 	}
 
 	byteData, err := json.Marshal(s)
@@ -103,4 +97,26 @@ func addPasswords(u user.User) error {
 	}
 
 	return nil
+}
+
+func processPassword() (string, error) {
+	var confirm bool
+	generateConfirm := &survey.Confirm{Message: "Do you want to automatically generate password?"}
+	err := survey.AskOne(generateConfirm, &confirm, survey.WithValidator(survey.Required))
+	if err != nil {
+		return "", fmt.Errorf("failed to get input : %w", err)
+	}
+
+	if confirm {
+		return RandStringRunes(32), nil
+	}
+
+	var password string
+	passwordPrompt := &survey.Password{Message: "Enter your password:"}
+	err = survey.AskOne(passwordPrompt, &password, survey.WithValidator(survey.Required))
+	if err != nil {
+		return "", fmt.Errorf("failed to get input : %w", err)
+	}
+
+	return password, nil
 }

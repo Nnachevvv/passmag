@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -15,7 +14,7 @@ var get = &cobra.Command{
 
 	Use:   "get",
 	Short: "Get password from your vault",
-	Long:  `Get passwword if exist from your vault`,
+	Long:  `Get password if exist from your vault`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		u, err := user.EnterSession()
 		if err != nil {
@@ -38,11 +37,12 @@ var get = &cobra.Command{
 			return err
 		}
 
-		if _, ok := s.Passwords[name]; !ok {
-			return errors.New("failed to find this password")
+		pass, err := s.Get(name)
+		if err != nil {
+			return err
 		}
 
-		fmt.Println(string(s.Passwords[name]))
+		fmt.Println(pass)
 
 		return nil
 	},

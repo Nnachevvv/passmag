@@ -23,6 +23,7 @@ func (s *Service) Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	s.client = client
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -38,8 +39,10 @@ func (s *Service) Connect() {
 func (s *Service) Insert(email string, vault []byte) error {
 	db := s.client.Database("manager")
 	collection := db.Collection("users")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	_, err := collection.InsertOne(ctx, bson.D{{Key: "email", Value: email},
 		{Key: "vault", Value: vault},
 	})
@@ -53,10 +56,10 @@ func (s *Service) Insert(email string, vault []byte) error {
 
 // Find gets data if exist from mongo db client
 func (s *Service) Find(email string) (bson.M, error) {
-	var record bson.M
 	db := s.client.Database("manager")
 	collection := db.Collection("users")
 
+	var record bson.M
 	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
 	if record["email"] == "" || string(email) != record["email"] {
 		return nil, errors.New("failed to find this account")

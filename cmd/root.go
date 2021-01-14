@@ -58,7 +58,7 @@ func SyncVault(s storage.Storage, password []byte) error {
 	vaultPwd := argon2.IDKey([]byte(s.Email), password, 1, 64*1024, 4, 32)
 	vaultData, err := crypt.Encrypt(byteData, vaultPwd)
 	if err != nil {
-		return fmt.Errorf("failed to add user to db", err)
+		return fmt.Errorf("failed to add user to db :%w", err)
 	}
 
 	service.Insert(s.Email, vaultData)

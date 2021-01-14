@@ -48,7 +48,7 @@ func Load(vaultData []byte) (Storage, error) {
 // Add adds name and password if name doesn't exist
 func (s *Storage) Add(name, password string) error {
 	if _, ok := s.Passwords[name]; ok {
-		return errors.New("this name alredy exist")
+		return errors.New("this name already exist")
 	}
 
 	s.Passwords[name] = []byte(password)

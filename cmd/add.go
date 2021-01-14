@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nnachevv/passmag/random"
+
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/nnachevv/passmag/user"
@@ -108,7 +110,7 @@ func processPassword() (string, error) {
 	}
 
 	if confirm {
-		return RandStringRunes(32), nil
+		return random.StringRune(32), nil
 	}
 
 	var password string

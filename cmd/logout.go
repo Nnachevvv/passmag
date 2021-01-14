@@ -12,7 +12,7 @@ var logout = &cobra.Command{
 
 	Use:   "logout",
 	Short: "Logout from logged user",
-	Long:  `Logout from logged user and deleate currently download vault`,
+	Long:  `Logout from logged user and delete currently download vault`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path, err := storage.FilePath()
 		if err != nil {
@@ -21,7 +21,7 @@ var logout = &cobra.Command{
 
 		err = os.Remove(path)
 		if err != nil {
-			return fmt.Errorf("failed to remove vault from %s, please deleate it manually: %w", path, err)
+			return fmt.Errorf("failed to remove vault from %s, please delete it manually: %w", path, err)
 		}
 
 		return nil

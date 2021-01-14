@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"math/rand"
-
 	"errors"
 	"fmt"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/nnachevv/passmag/crypt"
+	"github.com/nnachevv/passmag/random"
 	"github.com/nnachevv/passmag/storage"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -58,12 +56,12 @@ var login = &cobra.Command{
 			return err
 		}
 
-		decryptedVault, err := AuthAndGetVault(answers.Email, answers.MasterPassword)
+		decryptedVault, err := getVault(answers.Email, answers.MasterPassword)
 		if err != nil {
 			return err
 		}
 
-		sessionKey := RandStringRunes(32)
+		sessionKey := random.StringRune(32)
 
 		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
 
@@ -85,21 +83,8 @@ var login = &cobra.Command{
 	},
 }
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-func RandStringRunes(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
-}
-
-func AuthAndGetVault(email string, password string) ([]byte, error) {
+//GetVault func gets from db vault and decrypt it  current data
+func getVault(email string, password string) ([]byte, error) {
 	doc, err := service.Find(email)
 	if err != nil {
 		return nil, err
@@ -111,5 +96,4 @@ func AuthAndGetVault(email string, password string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to decrypt data value: %w ", err)
 	}
 	return encryptedVault, nil
-
 }

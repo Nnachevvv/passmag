@@ -62,7 +62,10 @@ var initialize = &cobra.Command{
 			ConfirmPassword string
 		}{}
 
-		survey.Ask(qs, &answers)
+		err := survey.Ask(qs, &answers)
+		if err != nil {
+			return fmt.Errorf("failed to process input : %w", err)
+		}
 
 		if answers.MasterPassword != answers.ConfirmPassword {
 			return errors.New("passwords doesn't match")
@@ -70,7 +73,7 @@ var initialize = &cobra.Command{
 
 		s := storage.New(bson.M{"email": answers.Email})
 
-		err := SyncVault(s, []byte(answers.MasterPassword))
+		err = SyncVault(s, []byte(answers.MasterPassword))
 		if err != nil {
 			return err
 		}

@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.2.7
+	github.com/atotto/clipboard v0.1.2
 	github.com/go-redis/redis/v8 v8.4.4 // indirect
 	github.com/gookit/color v1.3.6
 	github.com/jackc/pgx/v4 v4.10.1

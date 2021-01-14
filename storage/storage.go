@@ -79,6 +79,10 @@ func (s *Storage) Edit(name, password string) {
 	s.Passwords[name] = []byte(password)
 }
 
+func (s *Storage) SyncCurrentTime() {
+	s.TimeCreated = time.Now()
+}
+
 // FilePath returns path for currently used operating system
 func FilePath() (string, error) {
 	usr, err := user.Current()

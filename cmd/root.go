@@ -31,13 +31,14 @@ func init() {
 	rootCmd.AddCommand(remove)
 	rootCmd.AddCommand(add)
 	rootCmd.AddCommand(get)
+	rootCmd.AddCommand(copy)
 	rootCmd.AddCommand(edit)
 	rootCmd.AddCommand(change)
 	rootCmd.AddCommand(logout)
 	rootCmd.AddCommand(list)
+
 	service.Connect()
 	viper.AutomaticEnv()
-	//defer client.Disconnect(ctx)
 }
 
 // Execute executes the root command.
@@ -61,6 +62,7 @@ func SyncVault(s storage.Storage, password []byte) error {
 		return fmt.Errorf("failed to add user to db :%w", err)
 	}
 
+	s.SyncCurrentTime()
 	service.Insert(s.Email, vaultData)
 
 	if err != nil {

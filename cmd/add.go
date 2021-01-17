@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/nnachevv/passmag/random"
@@ -14,24 +13,6 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
-
-// the questions to ask
-var addQs = []*survey.Question{
-	{
-		Name:   "name",
-		Prompt: &survey.Input{Message: "Enter name for your password:"},
-	},
-	{
-		Name:   "password",
-		Prompt: &survey.Password{Message: "Enter your password:"},
-		Validate: func(val interface{}) error {
-			if str, ok := val.(string); !ok || len(str) < 8 {
-				return errors.New("password should be longer than 8 characters")
-			}
-			return nil
-		},
-	},
-}
 
 var add = &cobra.Command{
 

@@ -79,6 +79,7 @@ func (s *Storage) Edit(name, password string) {
 	s.Passwords[name] = []byte(password)
 }
 
+// SyncCurrentTime set value of storage to currenTime
 func (s *Storage) SyncCurrentTime() {
 	s.TimeCreated = time.Now()
 }

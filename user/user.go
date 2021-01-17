@@ -29,7 +29,7 @@ func EnterSession() (User, error) {
 		return User{}, err
 	}
 
-	var sessionKey string
+	var sessionKey, masterPassword string
 	if !viper.IsSet("PASS_SESSION") {
 		prompt := &survey.Input{Message: "Please enter your session key :"}
 		survey.AskOne(prompt, &sessionKey, survey.WithValidator(survey.Required))
@@ -37,7 +37,6 @@ func EnterSession() (User, error) {
 		sessionKey = viper.GetString("PASS_SESSION")
 	}
 
-	var masterPassword string
 	prompt := &survey.Password{Message: "Enter your  master password:"}
 	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
 	u := User{

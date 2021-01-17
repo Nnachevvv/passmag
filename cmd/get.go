@@ -11,7 +11,6 @@ import (
 )
 
 var get = &cobra.Command{
-
 	Use:   "get",
 	Short: "Get password from your vault",
 	Long:  `Get password if exist from your vault`,

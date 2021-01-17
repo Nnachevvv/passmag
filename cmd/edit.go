@@ -11,21 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// the questions to ask
-var editQs = []*survey.Question{
-	{
-		Name:   "name",
-		Prompt: &survey.Input{Message: "Enter name for which you want to change password:"},
-	},
-	{
-		Name:   "newname",
-		Prompt: &survey.Input{Message: "Enter new name for your password:"},
-	},
-}
-
 var edit = &cobra.Command{
 	Use:   "edit",
-	Short: "Initialize email, password and master password for your password manager",
+	Short: "Set new name for password",
 	Long:  `Set master password`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		u, err := user.EnterSession()
@@ -40,10 +28,26 @@ var edit = &cobra.Command{
 			return err
 		}
 
+		editQs := []*survey.Question{
+			{
+				Name:   "name",
+				Prompt: &survey.Input{Message: "Enter name for which you want to change password:"},
+			},
+			{
+				Name:   "newname",
+				Prompt: &survey.Input{Message: "Enter new name for your password:"},
+			},
+		}
+
 		answers := struct {
 			Name    string
 			NewName string
 		}{}
+
+		err = survey.Ask(editQs, &answers)
+		if err != nil {
+			return fmt.Errorf("failed to get input : %w", err)
+		}
 
 		pwd, err := s.Get(answers.Name)
 		if err != nil {

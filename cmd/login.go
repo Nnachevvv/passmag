@@ -16,54 +16,25 @@ import (
 )
 
 // the questions to ask
-var loginQs = []*survey.Question{
-	{
-		Name:   "email",
-		Prompt: &survey.Input{Message: "Enter your email address:"},
-		Validate: func(val interface{}) error {
-			email, ok := val.(string)
-			if !ok || len(email) < 8 {
-				return errors.New("email should be longer than 8 characters")
-			}
-
-			return nil
-		},
-	},
-	{
-		Name:   "masterpassword",
-		Prompt: &survey.Password{Message: "Enter your  master password:"},
-		Validate: func(val interface{}) error {
-			if str, ok := val.(string); !ok || len(str) < 8 {
-				return errors.New("password should be longer than 8 characters")
-			}
-			return nil
-		},
-	},
-}
 
 var login = &cobra.Command{
 	Use:   "login",
 	Short: "login to password manager CLI",
 	Long:  "login to password manager CLI and seal vault locally with generated random description key",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		answers := struct {
-			Email          string
-			MasterPassword string
-		}{}
-
-		err := survey.Ask(loginQs, &answers)
+		email, password, err := loginUserInput()
 		if err != nil {
 			return err
 		}
 
-		decryptedVault, err := getVault(answers.Email, answers.MasterPassword)
+		decryptedVault, err := getVault(email, password)
 		if err != nil {
 			return err
 		}
 
 		sessionKey := random.StringRune(32)
 
-		vaultPwd := argon2.IDKey([]byte(answers.MasterPassword), []byte(sessionKey), 1, 64*1024, 4, 32)
+		vaultPwd := argon2.IDKey([]byte(password), []byte(sessionKey), 1, 64*1024, 4, 32)
 
 		path, err := storage.FilePath()
 		if err != nil {
@@ -72,7 +43,7 @@ var login = &cobra.Command{
 
 		err = crypt.EncryptFile(path, decryptedVault, vaultPwd)
 		if err != nil {
-			return fmt.Errorf("failed to encrypt sessionData : %w", err)
+			return fmt.Errorf("failed to encrypt your vault : %w", err)
 		}
 
 		fmt.Println("You're session key is : " + string(sessionKey) + ". To unlock your vault\n" +
@@ -83,7 +54,6 @@ var login = &cobra.Command{
 	},
 }
 
-//GetVault func gets from db vault and decrypt it  current data
 func getVault(email string, password string) ([]byte, error) {
 	doc, err := service.Find(email)
 	if err != nil {
@@ -96,4 +66,44 @@ func getVault(email string, password string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to decrypt data value: %w ", err)
 	}
 	return encryptedVault, nil
+}
+
+func loginUserInput() (email string, password string, err error) {
+	answers := struct {
+		Email          string
+		MasterPassword string
+	}{}
+
+	loginQs := []*survey.Question{
+		{
+			Name:   "email",
+			Prompt: &survey.Input{Message: "Enter your email address:"},
+			Validate: func(val interface{}) error {
+				email, ok := val.(string)
+				if !ok || len(email) < 8 {
+					return errors.New("email should be longer than 8 characters")
+				}
+
+				return nil
+			},
+		},
+		{
+			Name:   "masterpassword",
+			Prompt: &survey.Password{Message: "Enter your  master password:"},
+			Validate: func(val interface{}) error {
+				if str, ok := val.(string); !ok || len(str) < 8 {
+					return errors.New("password should be longer than 8 characters")
+				}
+				return nil
+			},
+		},
+	}
+
+	err = survey.Ask(loginQs, &answers)
+	if err != nil {
+		return "", "", err
+	}
+
+	return answers.Email, answers.MasterPassword, nil
+
 }

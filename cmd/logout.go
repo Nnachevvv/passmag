@@ -23,7 +23,7 @@ var logout = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to remove vault from %s, please delete it manually: %w", path, err)
 		}
-
+		//TODO: sync vault after logout?
 		return nil
 	},
 }

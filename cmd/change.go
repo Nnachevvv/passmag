@@ -12,24 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// the questions to ask
-var changeQs = []*survey.Question{
-	{
-		Name:   "name",
-		Prompt: &survey.Input{Message: "Enter name for which you want to edit your password adress:"},
-	},
-	{
-		Name:   "password",
-		Prompt: &survey.Password{Message: "Enter new password:"},
-		Validate: func(val interface{}) error {
-			if str, ok := val.(string); !ok || len(str) < 8 {
-				return errors.New("password should be longer than 8 characters")
-			}
-			return nil
-		},
-	},
-}
-
 var change = &cobra.Command{
 
 	Use:   "change",
@@ -51,6 +33,23 @@ var change = &cobra.Command{
 			Name     string
 			Password string
 		}{}
+
+		changeQs := []*survey.Question{
+			{
+				Name:   "name",
+				Prompt: &survey.Input{Message: "Enter name for which you want to edit your password:"},
+			},
+			{
+				Name:   "password",
+				Prompt: &survey.Password{Message: "Enter new password:"},
+				Validate: func(val interface{}) error {
+					if str, ok := val.(string); !ok || len(str) < 8 {
+						return errors.New("password should be longer than 8 characters")
+					}
+					return nil
+				},
+			},
+		}
 
 		err = survey.Ask(changeQs, &answers)
 		if err != nil {

@@ -4,9 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -31,28 +29,7 @@ func Encrypt(data []byte, key []byte) ([]byte, error) {
 	return gcm.Seal(nonce, nonce, data, nil), nil
 }
 
-//Decrypt decrypts data by given passphrase
-func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		return nil, err
-	}
-
-	nonceSize := gcm.NonceSize()
-	if len(ciphertext) < nonceSize {
-		return nil, errors.New("ciphertext too short")
-	}
-
-	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-	return gcm.Open(nil, nonce, ciphertext, nil)
-}
-
-// EncryptFile encripts given data with cypher algorithm and saves it to file.
+// EncryptFile encrypts given data with cypher algorithm and saves it to file.
 func EncryptFile(filename string, data []byte, key []byte) error {
 	pathDir := filepath.Dir(filename)
 
@@ -76,19 +53,4 @@ func EncryptFile(filename string, data []byte, key []byte) error {
 
 	f.Write(byteEncrypted)
 	return nil
-}
-
-// DecryptFile decrypts file by given password
-func DecryptFile(filename string, key []byte) ([]byte, error) {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	byteEncrypted, err := Decrypt(data, key)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return byteEncrypted, nil
 }

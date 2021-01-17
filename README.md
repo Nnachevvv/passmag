@@ -14,38 +14,69 @@ If you already have the golang installed on your system, you can install the CLI
     go get github.com/nnachevv/passmag
 ```
 
+## Running
+If you've installed it:
+
+    $ passmag
+
+Otherwise, from the build directory:
+
+    $ ./passmag
+
+
 
 ## Documentation
 The Password manager CLI is self-documented with --help content and examples for every command. You should start exploring the CLI by using the global --help option:
-
-`passmag --help`
+    
+    $ passmag --help
 
 This option will list all available commands that you can use with the CLI.
 
 Additionally, you can run the --help option on a specific command to learn more about it:
 
-`passmag list --help`
-`passmag init --help`
+    $ passmag init --help
+    $ passmag list --help
 
-## Detailed documentation
+## Managing Your Vault
 
-`passmag init` - allows any user to register for the Password manager vault service.
+#### Init new vault
+To init and register new account in Password manager use:
+    
+    $ passmag init
 
-`passmag login` - login in your registered user.  After successfully logging into the CLI a session key will be returned. This session key is necessary to perform any commands that require your vault to be unlocked (list, get, edit, etc.).
+This command will add encrypted email address with your password. 
 
-`passmag add` - allows you to add a entry and password in your vault. Password can be randomly generated.
+#### Login and download your vault
+After you init your password you should login to download your vault locally:
 
-`passmag edit` - allows to edit your added password
+    $ passmag login
 
-`passmag get` - get password from already added passwords
+ After sussecfuly logged session key will be generated and your vault will be encrypted with your password and session_key. You should export SESSION_KEY variable or pass it every time to any command that require your vault to be unlocked (list, get, edit, etc.).
 
-`passmag cp` - copy password to clipboard.  
+#### Manage your vault
+There several options to manage your vault:
 
-> **WARNING**: For some operation system maybe this could not work.** 
+To add password , or randomly generate new one:
 
-`passmag list` - lists all current passwords from vault
+    $ passmag add
 
-`passmag logout` - delete vault from filesystem.
+Rename an already added password:
 
+    $ passmag edit
 
+Get password from your vault:
+
+    $ passmag get 
+
+Copy password without expose to clipboard:
+
+    $ passmag cp   
+
+List all passwords from your vault:
+
+    $ passmag list 
+
+Logout and delete vault from filesystem
+
+    $ passmag logout 
 

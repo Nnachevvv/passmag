@@ -26,9 +26,9 @@ var list = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Println("|                host                      |              password             |")
+
 		for n, p := range s.Passwords {
-			fmt.Printf("               %s                                        %s\n", n, string(p))
+			fmt.Printf("%s : %s\n", n, string(p))
 		}
 
 		return nil

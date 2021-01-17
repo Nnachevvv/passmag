@@ -31,7 +31,7 @@ var edit = &cobra.Command{
 		editQs := []*survey.Question{
 			{
 				Name:   "name",
-				Prompt: &survey.Input{Message: "Enter name for which you want to change password:"},
+				Prompt: &survey.Input{Message: "Enter existing name in your vault:"},
 			},
 			{
 				Name:   "newname",

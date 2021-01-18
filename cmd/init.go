@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/nnachevv/passmag/storage"
@@ -22,7 +23,10 @@ var initialize = &cobra.Command{
 			return err
 		}
 
-		s := storage.New(bson.M{"email": email})
+		s, err := storage.New(bson.M{"email": email}, time.Now())
+		if err != nil {
+			return err
+		}
 
 		err = SyncVault(s, []byte(password))
 		if err != nil {

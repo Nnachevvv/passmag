@@ -21,8 +21,12 @@ type Storage struct {
 }
 
 // New creates a new Storage object from passed email adress and current encrypted password in database
-func New(data map[string]interface{}) Storage {
-	s := Storage{TimeCreated: time.Now(), Email: data["email"].(string)}
+func New(data map[string]interface{}, creationTime time.Time) (Storage, error) {
+	if _, ok := data["email"].(string); !ok {
+		return Storage{}, errors.New("failed to get entry only with passwords")
+	}
+
+	s := Storage{TimeCreated: creationTime, Email: data["email"].(string)}
 
 	s.Passwords = make(map[string][]byte)
 	for k := range data {
@@ -30,7 +34,7 @@ func New(data map[string]interface{}) Storage {
 			s.Passwords[k] = data[k].(primitive.Binary).Data
 		}
 	}
-	return s
+	return s, nil
 }
 
 // Load unmarshal json to Storage struct

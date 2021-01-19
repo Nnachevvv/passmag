@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/nnachevv/passmag/cmd/mongo"
 	"github.com/nnachevv/passmag/crypt"
@@ -62,7 +63,7 @@ func SyncVault(s storage.Storage, password []byte) error {
 		return fmt.Errorf("failed to add user to db :%w", err)
 	}
 
-	s.SyncCurrentTime()
+	s.TimeCreated = time.Now()
 	service.Insert(s.Email, vaultData)
 
 	if err != nil {

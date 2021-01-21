@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/nnachevv/passmag/cmd/mongo"
@@ -27,24 +28,27 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(login)
-	rootCmd.AddCommand(initialize)
-	rootCmd.AddCommand(remove)
-	rootCmd.AddCommand(add)
-	rootCmd.AddCommand(get)
-	rootCmd.AddCommand(copy)
-	rootCmd.AddCommand(edit)
-	rootCmd.AddCommand(change)
-	rootCmd.AddCommand(logout)
-	rootCmd.AddCommand(list)
+	rootCmd.AddCommand(loginCmd)
+	rootCmd.AddCommand(initializeCmd)
+	rootCmd.AddCommand(removeCmd)
+	rootCmd.AddCommand(NewAddCmd())
+	rootCmd.AddCommand(getCmd)
+	rootCmd.AddCommand(copyCmd)
+	rootCmd.AddCommand(editCmd)
+	rootCmd.AddCommand(changeCmd)
+	rootCmd.AddCommand(logoutCmd)
+	rootCmd.AddCommand(listCmd)
 
 	service.Connect()
 	viper.AutomaticEnv()
 }
 
 // Execute executes the root command.
-func Execute() error {
-	return rootCmd.Execute()
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
 
 // ErrCreateUser throw by db when try to insert user

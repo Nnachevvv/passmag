@@ -62,6 +62,7 @@ var _ = Describe("storage package", func() {
 			s   storage.Storage
 			err error
 		)
+
 		BeforeEach(func() {
 			s.Passwords = make(map[string][]byte)
 			err = s.Add("test", "dummy")
@@ -89,6 +90,7 @@ var _ = Describe("storage package", func() {
 			s   storage.Storage
 			err error
 		)
+
 		BeforeEach(func() {
 			s.Passwords = make(map[string][]byte)
 
@@ -118,9 +120,9 @@ var _ = Describe("storage package", func() {
 			s   storage.Storage
 			err error
 		)
+
 		BeforeEach(func() {
 			s.Passwords = make(map[string][]byte)
-
 		})
 
 		When("gets name", func() {

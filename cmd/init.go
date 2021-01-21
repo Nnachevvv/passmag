@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var initialize = &cobra.Command{
+var initializeCmd = &cobra.Command{
 
 	Use:   "init",
 	Short: "Initialize email, password and master password for your password manager",

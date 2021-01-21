@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var change = &cobra.Command{
+var changeCmd = &cobra.Command{
 
 	Use:   "change",
 	Short: "Change password for given host",

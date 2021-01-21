@@ -14,25 +14,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var add = &cobra.Command{
+// NewAddCmd creates a new addCmd
+func NewAddCmd() *cobra.Command {
+	addCmd := &cobra.Command{
+		Use:   "add",
+		Short: "Initialize email, password and master password for your password manager",
+		Long:  `Set master password`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			u, err := user.EnterSession()
+			if err != nil {
+				return err
+			}
 
-	Use:   "add",
-	Short: "Initialize email, password and master password for your password manager",
-	Long:  `Set master password`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		u, err := user.EnterSession()
-		if err != nil {
-			return err
-		}
-
-		err = addPassword(u)
-		if err != nil {
-			return err
-		}
-		fmt.Println("successfully added")
-
-		return nil
-	},
+			err = addPassword(u)
+			if err != nil {
+				return err
+			}
+			fmt.Println("successfully added")
+			return nil
+		},
+	}
+	return addCmd
 }
 
 func addPassword(u user.User) error {

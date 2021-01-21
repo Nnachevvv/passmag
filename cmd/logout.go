@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var logout = &cobra.Command{
+var logoutCmd = &cobra.Command{
 
 	Use:   "logout",
 	Short: "Logout from logged user",

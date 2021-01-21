@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var copy = &cobra.Command{
+var copyCmd = &cobra.Command{
 
 	Use:   "cp",
 	Short: "Copy password to cpliboard",

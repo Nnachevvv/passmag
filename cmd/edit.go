@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var edit = &cobra.Command{
+var editCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Set new name for password",
 	Long:  `Set master password`,

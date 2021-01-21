@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var list = &cobra.Command{
+var listCmd = &cobra.Command{
 
 	Use:   "list",
 	Short: "Lists all password from your vault",

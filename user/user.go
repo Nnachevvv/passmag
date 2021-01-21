@@ -20,9 +20,15 @@ type User struct {
 
 //EnterSession prompts to enter Session Key and ask for master password
 func EnterSession() (User, error) {
-	path, err := storage.FilePath()
-	if err != nil {
-		return User{}, err
+	var path string
+	var err error
+	if !viper.IsSet("path") {
+		path, err = storage.FilePath()
+		if err != nil {
+			return User{}, err
+		}
+	} else {
+		path = viper.GetString("path")
 	}
 
 	if err := storage.VaultExist(path); err != nil {

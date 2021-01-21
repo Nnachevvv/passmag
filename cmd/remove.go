@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var remove = &cobra.Command{
+var removeCmd = &cobra.Command{
 
 	Use:   "remove",
 	Short: "Remove password from your password manager",

@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var get = &cobra.Command{
+var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get password from your vault",
 	Long:  `Get password if exist from your vault`,

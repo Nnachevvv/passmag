@@ -5,28 +5,33 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get password from your vault",
-	Long:  `Get password if exist from your vault`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		pass, err := getPassword()
-		if err != nil {
-			return err
-		}
+// NewGetCmd creates a new getCmd
+func NewGetCmd(stdio terminal.Stdio) *cobra.Command {
+	getCmd := &cobra.Command{
+		Use:   "get",
+		Short: "Get password from your vault",
+		Long:  `Get password if exist from your vault`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			pass, err := getPassword(stdio)
+			if err != nil {
+				return err
+			}
 
-		fmt.Println(pass)
-		return nil
-	},
+			fmt.Println(pass)
+			return nil
+		},
+	}
+	return getCmd
 }
 
-func getPassword() (string, error) {
-	u, err := user.EnterSession()
+func getPassword(stdio terminal.Stdio) (string, error) {
+	u, err := user.EnterSession(stdio)
 	if err != nil {
 		return "", err
 	}

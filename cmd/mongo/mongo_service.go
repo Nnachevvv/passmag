@@ -61,7 +61,8 @@ func (s *Service) Find(email string) (bson.M, error) {
 
 	var record bson.M
 	collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&record)
-	if record["email"] == "" || string(email) != record["email"] {
+
+	if record == nil {
 		return nil, errors.New("failed to find this account")
 	}
 

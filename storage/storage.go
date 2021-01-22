@@ -107,6 +107,7 @@ func FilePath() (string, error) {
 func VaultExist(path string) error {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
+		fmt.Println(err)
 		return errors.New("please login first")
 	}
 	return nil

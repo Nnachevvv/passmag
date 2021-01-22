@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/Netflix/go-expect"
@@ -21,49 +20,49 @@ import (
 
 var _ = Describe("Add", func() {
 	var (
-		path   string
+		c      *expect.Console
+		state  *vt10x.State
+		err    error
 		addCmd *cobra.Command
 		stdOut bytes.Buffer
 		stdErr bytes.Buffer
 	)
 
 	BeforeEach(func() {
-		addCmd = cmd.NewAddCmd()
+		c, state, err = vt10x.NewVT10XConsole()
+		Expect(err).ShouldNot(HaveOccurred())
+		addCmd = cmd.NewAddCmd(terminal.Stdio{c.Tty(), c.Tty(), c.Tty()})
 		addCmd.SetArgs([]string{})
 		addCmd.SetOut(&stdOut)
 		addCmd.SetErr(&stdErr)
 
 		fName, err := tempFile("fixtures/vault.bin")
 		Expect(err).ShouldNot(HaveOccurred())
-		path = filepath.Join(os.TempDir(), fName)
-		viper.Set("path", path)
-		viper.Set("PASS_SESSION", "fixed")
+
+		viper.Set("password.path", fName)
+		viper.Set("PASS_SESSION", "MRfbladUgDxLHvVWbxUjQUiZQykqiNcK")
 	})
 
 	Context("When user set PASS_SESSION ,decline generation, pass right arguments for his passwords", func() {
 		It("should add to vault his password", func() {
-			c, state, err := vt10x.NewVT10XConsole()
-			qf.SetStdio(terminal.Stdio{
-				In:  c.Tty(),
-				Out: c.Tty(),
-				Err: c.Tty()})
 			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 
 			go func() {
 				defer close(done)
-				c.ExpectString("Enter your  master password:")
-				c.SendLine("master")
+				c.ExpectString("Enter your master password:")
+				c.SendLine("test-dummy")
 				c.ExpectString("Enter name for your password:")
 				c.SendLine("dummy-name")
 				c.ExpectString("Do you want to automatically generate password?")
 				c.SendLine("N")
 				c.ExpectString("Enter your password:")
 				c.SendLine("dummy-password")
+				c.ExpectEOF()
 			}()
 
-			err := addCmd.Execute()
+			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 
 			c.Tty().Close()
@@ -74,28 +73,24 @@ var _ = Describe("Add", func() {
 
 	Context("want password to be generated, pass name for his password", func() {
 		It("should add to vault his password", func() {
-			c, state, err := vt10x.NewVT10XConsole()
-			qf.SetStdio(terminal.Stdio{
-				In:  c.Tty(),
-				Out: c.Tty(),
-				Err: c.Tty()})
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 
 			go func() {
 				defer close(done)
-				c.ExpectString("Enter your  master password:")
-				c.SendLine("master")
+				c.ExpectString("Enter your master password:")
+				c.SendLine("test-dummy")
 				c.ExpectString("Enter name for your password:")
 				c.SendLine("dummy-name")
 				c.ExpectString("Do you want to automatically generate password?")
 				c.SendLine("N")
 				c.ExpectString("Enter your password:")
 				c.SendLine("dummy-password")
+				c.ExpectEOF()
+
 			}()
 
-			err := addCmd.Execute()
+			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 
 			c.Tty().Close()
@@ -106,19 +101,14 @@ var _ = Describe("Add", func() {
 
 	Context("trying to add already exist password and decline editing already existing password", func() {
 		It("should add to vault his password", func() {
-			c, state, err := vt10x.NewVT10XConsole()
-			qf.SetStdio(terminal.Stdio{
-				In:  c.Tty(),
-				Out: c.Tty(),
-				Err: c.Tty()})
-			Expect(err).ShouldNot(HaveOccurred())
+
 			defer c.Close()
 			done := make(chan struct{})
 
 			go func() {
 				defer close(done)
-				c.ExpectString("Enter your  master password:")
-				c.SendLine("master")
+				c.ExpectString("Enter your master password:")
+				c.SendLine("test-dummy")
 				c.ExpectString("Enter name for your password:")
 				c.SendLine("exist")
 				c.ExpectString("Do you want to automatically generate password?")
@@ -127,9 +117,11 @@ var _ = Describe("Add", func() {
 				c.SendLine("dummy-password")
 				c.ExpectString("This name with password already exist! Do you want to edit name with newly password")
 				c.SendLine("N")
+				c.ExpectEOF()
+
 			}()
 
-			err := addCmd.Execute()
+			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 
 			c.Tty().Close()
@@ -140,30 +132,26 @@ var _ = Describe("Add", func() {
 
 	Context("trying to add already exist password and edit", func() {
 		It("should add to vault his password", func() {
-			c, state, err := vt10x.NewVT10XConsole()
-			qf.SetStdio(terminal.Stdio{
-				In:  c.Tty(),
-				Out: c.Tty(),
-				Err: c.Tty()})
 			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 
 			go func() {
 				defer close(done)
-				c.ExpectString("Enter your  master password:")
-				c.SendLine("master")
+				c.ExpectString("Enter your master password:")
+				c.SendLine("test-dummy")
 				c.ExpectString("Enter name for your password:")
-				c.SendLine("exist")
+				c.SendLine("exist@mail.com")
 				c.ExpectString("Do you want to automatically generate password?")
 				c.SendLine("N")
 				c.ExpectString("Enter your password:")
 				c.SendLine("dummy-password")
 				c.ExpectString("This name with password already exist! Do you want to edit name with newly password")
 				c.SendLine("y")
+				c.ExpectEOF()
 			}()
 
-			err := addCmd.Execute()
+			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 
 			c.Tty().Close()
@@ -197,3 +185,5 @@ func tempFile(path string) (string, error) {
 
 	return file.Name(), nil
 }
+
+////db -> exist@mail.com

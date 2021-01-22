@@ -5,32 +5,36 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
-var removeCmd = &cobra.Command{
+// NewRemoveCmd creates a new removeCmd
+func NewRemoveCmd(stdio terminal.Stdio) *cobra.Command {
+	removeCmd := &cobra.Command{
+		Use:   "remove",
+		Short: "Remove password from your password manager",
+		Long:  `Remove password from your password manager from given host`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			u, err := user.EnterSession(stdio)
+			if err != nil {
+				return err
+			}
 
-	Use:   "remove",
-	Short: "Remove password from your password manager",
-	Long:  `Remove password from your password manager from given host`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		u, err := user.EnterSession()
-		if err != nil {
-			return err
-		}
+			err = removePassword(u)
+			if err != nil {
+				return err
+			}
 
-		err = removePassword(u)
-		if err != nil {
-			return err
-		}
+			fmt.Println("successfully removed password")
 
-		fmt.Println("successfully removed password")
-
-		return nil
-	},
+			return nil
+		},
+	}
+	return removeCmd
 }
 
 func removePassword(u user.User) error {

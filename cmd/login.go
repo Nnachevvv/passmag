@@ -59,6 +59,9 @@ func getVault(email string, password string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("email " + email)
+	fmt.Println("password " + password)
+
 	vaultPwd := argon2.IDKey([]byte(password), []byte(email), 1, 64*1024, 4, 32)
 
 	encryptedVault, err := crypt.Decrypt(doc["vault"].(primitive.Binary).Data, vaultPwd)

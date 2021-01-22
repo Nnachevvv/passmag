@@ -55,10 +55,8 @@ func initUserInput() (email string, password string, err error) {
 					return errors.New("email should be longer than 8 characters")
 				}
 
-				_, err := service.Find(email)
-
-				if err != nil {
-					return fmt.Errorf("email address %s exist in our database", email)
+				if _, err := service.Find(email); err == nil {
+					return errors.New("email address already exist in our database")
 				}
 				return nil
 			},

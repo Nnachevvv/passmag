@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/cmd/mongo"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
@@ -28,16 +29,18 @@ var (
 )
 
 func init() {
+	io := terminal.Stdio{os.Stdin, os.Stdout, os.Stderr}
+
 	rootCmd.AddCommand(loginCmd)
 	rootCmd.AddCommand(initializeCmd)
-	rootCmd.AddCommand(removeCmd)
-	rootCmd.AddCommand(NewAddCmd())
-	rootCmd.AddCommand(getCmd)
-	rootCmd.AddCommand(copyCmd)
-	rootCmd.AddCommand(editCmd)
-	rootCmd.AddCommand(changeCmd)
+	rootCmd.AddCommand(NewRemoveCmd(io))
+	rootCmd.AddCommand(NewAddCmd(io))
+	rootCmd.AddCommand(NewGetCmd(io))
+	rootCmd.AddCommand(NewCopyCmd(io))
+	rootCmd.AddCommand(NewEditCmd(io))
+	rootCmd.AddCommand(NewChangeCmd(io))
 	rootCmd.AddCommand(logoutCmd)
-	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(NewListCmd(io))
 
 	service.Connect()
 	viper.AutomaticEnv()
@@ -61,7 +64,7 @@ func SyncVault(s storage.Storage, password []byte) error {
 		return fmt.Errorf("failed to marshal map : %w", err)
 	}
 
-	vaultPwd := argon2.IDKey([]byte(s.Email), password, 1, 64*1024, 4, 32)
+	vaultPwd := argon2.IDKey(password, []byte(s.Email), 1, 64*1024, 4, 32)
 	vaultData, err := crypt.Encrypt(byteData, vaultPwd)
 	if err != nil {
 		return fmt.Errorf("failed to add user to db :%w", err)

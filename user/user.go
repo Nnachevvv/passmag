@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/viper"
@@ -19,37 +20,35 @@ type User struct {
 }
 
 //EnterSession prompts to enter Session Key and ask for master password
-func EnterSession() (User, error) {
+func EnterSession(stdio terminal.Stdio) (User, error) {
 	var path string
 	var err error
-	if !viper.IsSet("path") {
+	if !viper.IsSet("password.path") {
 		path, err = storage.FilePath()
 		if err != nil {
 			return User{}, err
 		}
 	} else {
-		path = viper.GetString("path")
+		path = viper.GetString("password.path")
 	}
 
 	if err := storage.VaultExist(path); err != nil {
 		return User{}, err
 	}
-
 	var sessionKey, masterPassword string
 	if !viper.IsSet("PASS_SESSION") {
 		prompt := &survey.Input{Message: "Please enter your session key :"}
-		survey.AskOne(prompt, &sessionKey, survey.WithValidator(survey.Required))
+		survey.AskOne(prompt, &sessionKey, survey.WithValidator(survey.Required), survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
 	} else {
 		sessionKey = viper.GetString("PASS_SESSION")
 	}
 
-	prompt := &survey.Password{Message: "Enter your  master password:"}
-	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required))
+	prompt := &survey.Password{Message: "Enter your master password:"}
+	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required), survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
 	u := User{
 		Password:  []byte(masterPassword),
 		VaultPwd:  argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32),
 		VaultPath: path}
-
 	err = u.loadVault()
 	if err != nil {
 		return User{}, err

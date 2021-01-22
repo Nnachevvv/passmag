@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,35 +12,42 @@ import (
 	"github.com/Netflix/go-expect"
 	"github.com/hinshun/vt10x"
 	"github.com/nnachevv/passmag/cmd"
+	"github.com/nnachevv/passmag/crypt"
+	"github.com/nnachevv/passmag/storage"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/argon2"
 )
 
 var _ = Describe("Add", func() {
 	var (
-		c      *expect.Console
-		state  *vt10x.State
-		err    error
-		addCmd *cobra.Command
-		stdOut bytes.Buffer
-		stdErr bytes.Buffer
+		c        *expect.Console
+		state    *vt10x.State
+		err      error
+		path     string
+		addCmd   *cobra.Command
+		stdOut   bytes.Buffer
+		stdErr   bytes.Buffer
+		vaultPwd []byte
 	)
 
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
 		addCmd = cmd.NewAddCmd(terminal.Stdio{c.Tty(), c.Tty(), c.Tty()})
+
 		addCmd.SetArgs([]string{})
 		addCmd.SetOut(&stdOut)
 		addCmd.SetErr(&stdErr)
 
-		fName, err := tempFile("fixtures/vault.bin")
+		vaultPwd = argon2.IDKey([]byte("test-dummy"), []byte("MRfbladUgDxLHvVWbxUjQUiZQykqiNcK"), 1, 64*1024, 4, 32)
+		path, err = tempFile("fixtures/vault.bin")
 		Expect(err).ShouldNot(HaveOccurred())
 
-		viper.Set("password.path", fName)
+		viper.Set("password.path", path)
 		viper.Set("PASS_SESSION", "MRfbladUgDxLHvVWbxUjQUiZQykqiNcK")
 	})
 
@@ -61,9 +69,11 @@ var _ = Describe("Add", func() {
 				c.SendLine("dummy-password")
 				c.ExpectEOF()
 			}()
-
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
+			password, ok := getAddedPassword(path, "dummy-name", vaultPwd)
+			Expect(ok).Should(BeTrue())
+			Expect(string(password)).To(Equal("dummy-password"))
 
 			c.Tty().Close()
 			<-done
@@ -81,17 +91,16 @@ var _ = Describe("Add", func() {
 				c.ExpectString("Enter your master password:")
 				c.SendLine("test-dummy")
 				c.ExpectString("Enter name for your password:")
-				c.SendLine("dummy-name")
+				c.SendLine("dummy-random")
 				c.ExpectString("Do you want to automatically generate password?")
-				c.SendLine("N")
-				c.ExpectString("Enter your password:")
-				c.SendLine("dummy-password")
+				c.SendLine("y")
 				c.ExpectEOF()
 
 			}()
-
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
+			_, ok := getAddedPassword(path, "dummy-random", vaultPwd)
+			Expect(ok).Should(BeTrue())
 
 			c.Tty().Close()
 			<-done
@@ -123,6 +132,9 @@ var _ = Describe("Add", func() {
 
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
+			password, ok := getAddedPassword(path, "exist", vaultPwd)
+			Expect(ok).Should(BeTrue())
+			Expect(string(password)).To(Equal("dummy-password"))
 
 			c.Tty().Close()
 			<-done
@@ -153,6 +165,9 @@ var _ = Describe("Add", func() {
 
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
+			password, ok := getAddedPassword(path, "exist@mail.com", vaultPwd)
+			Expect(ok).Should(BeTrue())
+			Expect(string(password)).To(Equal("dummy-password"))
 
 			c.Tty().Close()
 			<-done
@@ -186,4 +201,15 @@ func tempFile(path string) (string, error) {
 	return file.Name(), nil
 }
 
-////db -> exist@mail.com
+func getAddedPassword(path string, name string, vaultPwd []byte) (string, bool) {
+	vaultData, err := crypt.DecryptFile(path, vaultPwd)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	var s storage.Storage
+
+	err = json.Unmarshal(vaultData, &s)
+	Expect(err).ShouldNot(HaveOccurred())
+	password, ok := s.Passwords[name]
+
+	return string(password), ok
+}

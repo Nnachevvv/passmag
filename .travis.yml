@@ -10,7 +10,7 @@ before_install:
   - sudo apt-get install -y xsel
 
 script:
-  - go test -v -coverpkg=./... -coverprofile=cover ./...
+  - go test -v -coverpkg=./... -coverprofile=cover.txt ./...
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

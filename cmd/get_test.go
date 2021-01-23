@@ -60,7 +60,6 @@ var _ = Describe("Change", func() {
 
 			err = getCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(expect.StripTrailingEmptyLines(string(stdOut.String()))).To(Equal("gMdLasZIGAEmDSCprqFkZQSAnjzeZzUP"))
 
 			c.Tty().Close()
 			<-done

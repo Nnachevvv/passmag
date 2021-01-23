@@ -154,7 +154,7 @@ var _ = Describe("storage package", func() {
 
 		When("edits name", func() {
 			It("returns edited password", func() {
-				s.Edit("test", "dummy2")
+				s.Change("test", "dummy2")
 				Expect(s.Passwords["test"]).Should(Equal([]byte("dummy2")))
 			})
 		})

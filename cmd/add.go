@@ -62,7 +62,7 @@ func addPassword(u user.User, stdio terminal.Stdio) error {
 		if !confirm {
 			return nil
 		}
-		s.Edit(name, password)
+		s.Change(name, password)
 	}
 
 	byteData, err := json.Marshal(s)

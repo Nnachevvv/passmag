@@ -35,6 +35,7 @@ func EnterSession(stdio terminal.Stdio) (User, error) {
 	if err := storage.VaultExist(path); err != nil {
 		return User{}, err
 	}
+
 	var sessionKey, masterPassword string
 	if !viper.IsSet("PASS_SESSION") {
 		prompt := &survey.Input{Message: "Please enter your session key :"}
@@ -45,15 +46,14 @@ func EnterSession(stdio terminal.Stdio) (User, error) {
 
 	prompt := &survey.Password{Message: "Enter your master password:"}
 	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required), survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
-	u := User{
-		Password:  []byte(masterPassword),
+	u := User{Password: []byte(masterPassword),
 		VaultPwd:  argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32),
 		VaultPath: path}
+
 	err = u.loadVault()
 	if err != nil {
 		return User{}, err
 	}
-
 	return u, err
 }
 

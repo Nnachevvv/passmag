@@ -174,6 +174,27 @@ var _ = Describe("Add", func() {
 			fmt.Fprintf(ginkgo.GinkgoWriter, "--- Terminal ---\n%s\n----------------\n", expect.StripTrailingEmptyLines(state.String()))
 		})
 	})
+
+	Context("pass wrong master password", func() {
+		It("throw failed to find this name error", func() {
+			defer c.Close()
+			done := make(chan struct{})
+
+			go func() {
+				defer close(done)
+				c.ExpectString("Enter your master password:")
+				c.SendLine("wrong")
+				c.ExpectEOF()
+
+			}()
+			err = addCmd.Execute()
+			Expect(err).Should(HaveOccurred())
+
+			c.Tty().Close()
+			<-done
+			fmt.Fprintf(ginkgo.GinkgoWriter, "--- Terminal ---\n%s\n----------------\n", expect.StripTrailingEmptyLines(state.String()))
+		})
+	})
 })
 
 // creates a new temporary file

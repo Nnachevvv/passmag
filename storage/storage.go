@@ -78,8 +78,8 @@ func (s *Storage) Get(name string) (string, error) {
 	return string(s.Passwords[name]), nil
 }
 
-// Edit edits password
-func (s *Storage) Edit(name, password string) {
+// Change edits password for given name
+func (s *Storage) Change(name, password string) {
 	s.Passwords[name] = []byte(password)
 }
 

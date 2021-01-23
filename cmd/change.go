@@ -27,7 +27,6 @@ func NewChangeCmd(stdio terminal.Stdio) *cobra.Command {
 				return err
 			}
 			var s storage.Storage
-
 			err = json.Unmarshal(u.VaultData, &s)
 			if err != nil {
 				return err
@@ -41,7 +40,7 @@ func NewChangeCmd(stdio terminal.Stdio) *cobra.Command {
 			changeQs := []*survey.Question{
 				{
 					Name:   "name",
-					Prompt: &survey.Input{Message: "Enter name for which you want to edit your password:"},
+					Prompt: &survey.Input{Message: "Enter name for which you want to change your password:"},
 				},
 				{
 					Name:   "password",
@@ -54,8 +53,7 @@ func NewChangeCmd(stdio terminal.Stdio) *cobra.Command {
 					},
 				},
 			}
-
-			err = survey.Ask(changeQs, &answers)
+			err = survey.Ask(changeQs, &answers, survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
 			if err != nil {
 				return err
 			}
@@ -64,7 +62,7 @@ func NewChangeCmd(stdio terminal.Stdio) *cobra.Command {
 				return errors.New("failed to find this name")
 			}
 
-			s.Edit(answers.Name, answers.Password)
+			s.Change(answers.Name, answers.Password)
 			byteData, err := json.Marshal(s)
 			if err != nil {
 				return fmt.Errorf("failed to marshal map : %w", err)
@@ -73,7 +71,7 @@ func NewChangeCmd(stdio terminal.Stdio) *cobra.Command {
 			err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
 
 			if err != nil {
-				return fmt.Errorf("failed to encrypt sessionData : %w", err)
+				return fmt.Errorf("failed to encrypt your data: %w", err)
 			}
 
 			err = SyncVault(s, u.Password)

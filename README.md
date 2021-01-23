@@ -1,4 +1,5 @@
 # password-manager
+[![Build Status](https://travis-ci.com/Nnachevvv/password-manager.svg?branch=main)](https://travis-ci.com/Nnachevvv/password-manager)
 
 The Password manager is a full-featured command-line interface (CLI) tool for helping you store all of your login credentials. Password managers helps you to have easy access to all of your password - all you need is to remember your email address and master password. 
 

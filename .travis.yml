@@ -6,6 +6,7 @@ go:
 
 before_install:
   - go get -t -v ./...
+  - sudo apt-get -y install golang-ginkgo-de
 
 script:
   - ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress

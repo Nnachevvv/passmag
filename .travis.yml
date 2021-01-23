@@ -7,6 +7,7 @@ go:
 before_install:
   - go get -t -v ./...
   - sudo apt-get -y install golang-ginkgo-dev
+  - sudo apt-get install -y xclip
 
 script:
   - ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress

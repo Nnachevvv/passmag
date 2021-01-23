@@ -23,7 +23,7 @@ func NewGetCmd(stdio terminal.Stdio) *cobra.Command {
 				return err
 			}
 
-			fmt.Println(pass)
+			fmt.Fprintln(cmd.OutOrStdout(), pass)
 			return nil
 		},
 	}
@@ -45,9 +45,9 @@ func getPassword(stdio terminal.Stdio) (string, error) {
 
 	var name string
 
-	namePrompt := &survey.Input{Message: "Enter name for which you want to get password:"}
+	namePrompt := &survey.Input{Message: "Enter name for which you want to get your password:"}
 
-	err = survey.AskOne(namePrompt, &name)
+	err = survey.AskOne(namePrompt, &name, survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
 	if err != nil {
 		return "", err
 	}

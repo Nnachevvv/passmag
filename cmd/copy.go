@@ -17,6 +17,7 @@ func NewCopyCmd(stdio terminal.Stdio) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			clipboard.WriteAll(pass)
 			return nil
 		},

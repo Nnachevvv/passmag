@@ -47,7 +47,7 @@ func NewEditCmd(stdio terminal.Stdio) *cobra.Command {
 				NewName string
 			}{}
 
-			err = survey.Ask(editQs, &answers)
+			err = survey.Ask(editQs, &answers, survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
 			if err != nil {
 				return fmt.Errorf("failed to get input : %w", err)
 			}
@@ -81,7 +81,7 @@ func NewEditCmd(stdio terminal.Stdio) *cobra.Command {
 			if err != nil && err != ErrCreateUser {
 				return err
 			}
-			fmt.Println("succesfuly moved your password")
+			fmt.Fprintln(cmd.OutOrStdout(), "successfully moved your password")
 
 			return nil
 		},

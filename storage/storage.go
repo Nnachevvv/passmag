@@ -72,7 +72,7 @@ func (s *Storage) Remove(name string) error {
 // Get gets password if exist from given name
 func (s *Storage) Get(name string) (string, error) {
 	if _, ok := s.Passwords[name]; !ok {
-		return "", errors.New("this name not exist in your password manager ")
+		return "", errors.New("this name not exist in your password manager")
 	}
 
 	return string(s.Passwords[name]), nil

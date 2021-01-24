@@ -8,26 +8,24 @@ import (
 
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
-	"github.com/nnachevv/passmag/user"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/spf13/cobra"
 )
 
 // NewAddCmd creates a new addCmd
-func NewAddCmd(stdio terminal.Stdio) *cobra.Command {
+func NewAddCmd() *cobra.Command {
 	addCmd := &cobra.Command{
 		Use:   "add",
 		Short: "Initialize email, password and master password for your password manager",
 		Long:  `Set master password`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			u, err := user.EnterSession(stdio)
+			u, err := EnterSession()
 			if err != nil {
 				return err
 			}
 
-			err = addPassword(u, stdio)
+			err = addPassword(u)
 			if err != nil {
 				return err
 			}
@@ -38,12 +36,12 @@ func NewAddCmd(stdio terminal.Stdio) *cobra.Command {
 	return addCmd
 }
 
-func addPassword(u user.User, stdio terminal.Stdio) error {
+func addPassword(u User) error {
 	var name string
 	namePrompt := &survey.Input{Message: "Enter name for your password:"}
-	survey.AskOne(namePrompt, &name, survey.WithValidator(survey.Required), survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
+	survey.AskOne(namePrompt, &name, survey.WithValidator(survey.Required), survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 
-	password, err := processPassword(stdio)
+	password, err := processPassword()
 	if err != nil {
 		return err
 	}
@@ -58,7 +56,7 @@ func addPassword(u user.User, stdio terminal.Stdio) error {
 	if err != nil {
 		var confirm bool
 		editConfirm := &survey.Confirm{Message: "This name with password already exist! Do you want to edit name with newly password"}
-		survey.AskOne(editConfirm, &confirm, survey.WithValidator(survey.Required), survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
+		survey.AskOne(editConfirm, &confirm, survey.WithValidator(survey.Required), survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 		if !confirm {
 			return nil
 		}
@@ -84,10 +82,10 @@ func addPassword(u user.User, stdio terminal.Stdio) error {
 	return nil
 }
 
-func processPassword(stdio terminal.Stdio) (string, error) {
+func processPassword() (string, error) {
 	var confirm bool
 	generateConfirm := &survey.Confirm{Message: "Do you want to automatically generate password?"}
-	err := survey.AskOne(generateConfirm, &confirm, survey.WithValidator(survey.Required), survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
+	err := survey.AskOne(generateConfirm, &confirm, survey.WithValidator(survey.Required), survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 	if err != nil {
 		return "", fmt.Errorf("failed to get input : %w", err)
 	}
@@ -98,7 +96,7 @@ func processPassword(stdio terminal.Stdio) (string, error) {
 
 	var password string
 	passwordPrompt := &survey.Password{Message: "Enter your password:"}
-	err = survey.AskOne(passwordPrompt, &password, survey.WithValidator(survey.Required), survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
+	err = survey.AskOne(passwordPrompt, &password, survey.WithValidator(survey.Required), survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 	if err != nil {
 		return "", fmt.Errorf("failed to get input : %w", err)
 	}

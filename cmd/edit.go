@@ -5,21 +5,19 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
-	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
 // NewEditCmd creates a new editCmd
-func NewEditCmd(stdio terminal.Stdio) *cobra.Command {
+func NewEditCmd() *cobra.Command {
 	editCmd := &cobra.Command{
 		Use:   "edit",
 		Short: "Set new name for password",
 		Long:  `Set master password`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			u, err := user.EnterSession(stdio)
+			u, err := EnterSession()
 			if err != nil {
 				return err
 			}
@@ -47,7 +45,7 @@ func NewEditCmd(stdio terminal.Stdio) *cobra.Command {
 				NewName string
 			}{}
 
-			err = survey.Ask(editQs, &answers, survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
+			err = survey.Ask(editQs, &answers, survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 			if err != nil {
 				return fmt.Errorf("failed to get input : %w", err)
 			}

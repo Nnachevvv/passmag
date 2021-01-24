@@ -32,7 +32,8 @@ var _ = Describe("Change", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		changeCmd = cmd.NewChangeCmd(terminal.Stdio{c.Tty(), c.Tty(), c.Tty()})
+		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		changeCmd = cmd.NewChangeCmd()
 
 		changeCmd.SetArgs([]string{})
 		changeCmd.SetOut(&stdOut)

@@ -5,20 +5,18 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/storage"
-	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
 // NewGetCmd creates a new getCmd
-func NewGetCmd(stdio terminal.Stdio) *cobra.Command {
+func NewGetCmd() *cobra.Command {
 	getCmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get password from your vault",
 		Long:  `Get password if exist from your vault`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			pass, err := getPassword(stdio)
+			pass, err := getPassword()
 			if err != nil {
 				return err
 			}
@@ -30,8 +28,8 @@ func NewGetCmd(stdio terminal.Stdio) *cobra.Command {
 	return getCmd
 }
 
-func getPassword(stdio terminal.Stdio) (string, error) {
-	u, err := user.EnterSession(stdio)
+func getPassword() (string, error) {
+	u, err := EnterSession()
 	if err != nil {
 		return "", err
 	}
@@ -47,7 +45,7 @@ func getPassword(stdio terminal.Stdio) (string, error) {
 
 	namePrompt := &survey.Input{Message: "Enter name for which you want to get your password:"}
 
-	err = survey.AskOne(namePrompt, &name, survey.WithStdio(stdio.In, stdio.Out, stdio.Err))
+	err = survey.AskOne(namePrompt, &name, survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 	if err != nil {
 		return "", err
 	}

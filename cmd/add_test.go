@@ -37,7 +37,8 @@ var _ = Describe("Add", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		addCmd = cmd.NewAddCmd(terminal.Stdio{c.Tty(), c.Tty(), c.Tty()})
+		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		addCmd = cmd.NewAddCmd()
 
 		addCmd.SetArgs([]string{})
 		addCmd.SetOut(&stdOut)

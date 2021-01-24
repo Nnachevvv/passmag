@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	// Used for flags.
 	cfgFile string
 	service mongo.Service
-
+	// Stdio is used for testing virtuall terminal.
+	Stdio   terminal.Stdio
 	rootCmd = &cobra.Command{
 		Use:   "passmag",
 		Short: "A password manager used to store securely passwords",
@@ -29,18 +29,18 @@ var (
 )
 
 func init() {
-	io := terminal.Stdio{os.Stdin, os.Stdout, os.Stderr}
+	Stdio = terminal.Stdio{os.Stdin, os.Stdout, os.Stderr}
 
 	rootCmd.AddCommand(loginCmd)
 	rootCmd.AddCommand(initializeCmd)
-	rootCmd.AddCommand(NewRemoveCmd(io))
-	rootCmd.AddCommand(NewAddCmd(io))
-	rootCmd.AddCommand(NewGetCmd(io))
-	rootCmd.AddCommand(NewCopyCmd(io))
-	rootCmd.AddCommand(NewEditCmd(io))
-	rootCmd.AddCommand(NewChangeCmd(io))
+	rootCmd.AddCommand(NewRemoveCmd())
+	rootCmd.AddCommand(NewAddCmd())
+	rootCmd.AddCommand(NewGetCmd())
+	rootCmd.AddCommand(NewCopyCmd())
+	rootCmd.AddCommand(NewEditCmd())
+	rootCmd.AddCommand(NewChangeCmd())
 	rootCmd.AddCommand(logoutCmd)
-	rootCmd.AddCommand(NewListCmd(io))
+	rootCmd.AddCommand(NewListCmd())
 
 	service.Connect()
 	viper.AutomaticEnv()

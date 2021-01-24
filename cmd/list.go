@@ -4,20 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/storage"
-	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
 // NewListCmd creates a new listCmd
-func NewListCmd(stdio terminal.Stdio) *cobra.Command {
+func NewListCmd() *cobra.Command {
 	listCmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all password from your vault",
 		Long:  `Ask for authorization and lists all password from your vault`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			u, err := user.EnterSession(stdio)
+			u, err := EnterSession()
 			if err != nil {
 				return err
 			}

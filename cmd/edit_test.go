@@ -32,7 +32,8 @@ var _ = Describe("Change", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		editCmd = cmd.NewEditCmd(terminal.Stdio{c.Tty(), c.Tty(), c.Tty()})
+		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		editCmd = cmd.NewEditCmd()
 
 		editCmd.SetArgs([]string{})
 		editCmd.SetOut(&stdOut)
@@ -99,7 +100,7 @@ var _ = Describe("Change", func() {
 			}()
 
 			err = editCmd.Execute()
-			Expect(err).To(Equal(errors.New("this name not exist in your password manager")))
+			Expect(err).To(Equal(errors.New("this name not exist in your vault")))
 
 			c.Tty().Close()
 			<-done

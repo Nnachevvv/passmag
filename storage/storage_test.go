@@ -107,9 +107,9 @@ var _ = Describe("storage package", func() {
 		})
 
 		When("add name, password that exist in db", func() {
-			It("returns error: this name not exist in db", func() {
+			It("returns error: this name not exist in your vault", func() {
 				err = s.Remove("test")
-				expectedErr := errors.New("this name not exist in our db")
+				expectedErr := errors.New("this name not exist in your vault")
 				Expect(err).To(Equal(expectedErr))
 			})
 		})
@@ -135,9 +135,9 @@ var _ = Describe("storage package", func() {
 		})
 
 		When("get name that not exist in db", func() {
-			It("returns error: this name not exist in your password manager", func() {
+			It("returns error: this name not exist in your vault", func() {
 				_, err = s.Get("test1")
-				expectedErr := errors.New("this name not exist in your password manager")
+				expectedErr := errors.New("this name not exist in your vault")
 				Expect(err).To(Equal(expectedErr))
 			})
 		})

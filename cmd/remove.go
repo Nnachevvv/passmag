@@ -5,21 +5,19 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
-	"github.com/nnachevv/passmag/user"
 	"github.com/spf13/cobra"
 )
 
 // NewRemoveCmd creates a new removeCmd
-func NewRemoveCmd(stdio terminal.Stdio) *cobra.Command {
+func NewRemoveCmd() *cobra.Command {
 	removeCmd := &cobra.Command{
 		Use:   "remove",
 		Short: "Remove password from your password manager",
 		Long:  `Remove password from your password manager from given host`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			u, err := user.EnterSession(stdio)
+			u, err := EnterSession()
 			if err != nil {
 				return err
 			}
@@ -29,7 +27,7 @@ func NewRemoveCmd(stdio terminal.Stdio) *cobra.Command {
 				return err
 			}
 
-			fmt.Println("successfully removed password")
+			fmt.Fprintln(cmd.OutOrStdout(), "successfully removed password")
 
 			return nil
 		},
@@ -37,12 +35,11 @@ func NewRemoveCmd(stdio terminal.Stdio) *cobra.Command {
 	return removeCmd
 }
 
-func removePassword(u user.User) error {
+func removePassword(u User) error {
 	var removeName string
-	prompt := &survey.Password{Message: "Enter for which Name you want to remove password:"}
-	survey.AskOne(prompt, &removeName, survey.WithValidator(survey.Required))
+	prompt := &survey.Password{Message: "Enter name of password you want to remove:"}
 
-	err := survey.AskOne(prompt, &removeName)
+	err := survey.AskOne(prompt, &removeName, survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 	if err != nil {
 		return err
 	}

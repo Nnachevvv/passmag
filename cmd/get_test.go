@@ -30,7 +30,8 @@ var _ = Describe("Change", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		getCmd = cmd.NewGetCmd(terminal.Stdio{c.Tty(), c.Tty(), c.Tty()})
+		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		getCmd = cmd.NewGetCmd()
 
 		getCmd.SetArgs([]string{})
 		getCmd.SetOut(&stdOut)
@@ -83,7 +84,7 @@ var _ = Describe("Change", func() {
 			}()
 
 			err = getCmd.Execute()
-			Expect(err).To(Equal(errors.New("this name not exist in your password manager")))
+			Expect(err).To(Equal(errors.New("this name not exist in your vault")))
 			c.Tty().Close()
 			<-done
 			fmt.Fprintf(ginkgo.GinkgoWriter, "--- Terminal ---\n%s\n----------------\n", expect.StripTrailingEmptyLines(state.String()))

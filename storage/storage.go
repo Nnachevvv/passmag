@@ -62,7 +62,7 @@ func (s *Storage) Add(name, password string) error {
 // Remove remove name and password from password manager
 func (s *Storage) Remove(name string) error {
 	if _, ok := s.Passwords[name]; !ok {
-		return errors.New("this name not exist in our db")
+		return errors.New("this name not exist in your vault")
 	}
 
 	delete(s.Passwords, name)
@@ -72,7 +72,7 @@ func (s *Storage) Remove(name string) error {
 // Get gets password if exist from given name
 func (s *Storage) Get(name string) (string, error) {
 	if _, ok := s.Passwords[name]; !ok {
-		return "", errors.New("this name not exist in your password manager")
+		return "", errors.New("this name not exist in your vault")
 	}
 
 	return string(s.Passwords[name]), nil

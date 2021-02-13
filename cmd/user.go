@@ -35,8 +35,8 @@ func EnterSession() (User, error) {
 	}
 
 	var sessionKey, masterPassword string
-	if !viper.IsSet("PASS_SESSION") {
-		prompt := &survey.Input{Message: "Please enter your session key :"}
+	if !viper.IsSet("PASS_SESSION") || viper.Get("PASS_SESSION") == "" {
+		prompt := &survey.Input{Message: "Please enter your session key:"}
 		survey.AskOne(prompt, &sessionKey, survey.WithValidator(survey.Required), survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 	} else {
 		sessionKey = viper.GetString("PASS_SESSION")
@@ -44,6 +44,7 @@ func EnterSession() (User, error) {
 
 	prompt := &survey.Password{Message: "Enter your master password:"}
 	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required), survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
+	fmt.Println("tuk")
 	u := User{Password: []byte(masterPassword),
 		VaultPwd:  argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32),
 		VaultPath: path}

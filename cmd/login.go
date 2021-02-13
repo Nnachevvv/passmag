@@ -6,7 +6,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/nnachevv/passmag/cmd/mongo"
 	"github.com/nnachevv/passmag/random"
 	"github.com/nnachevv/passmag/storage"
 
@@ -15,8 +14,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// NewLoinCmd creates a new loginCmd
-func NewLoginCmd(md mongo.MongoDatabase) *cobra.Command {
+//NewLoginCmd creates a new loginCmd
+func NewLoginCmd() *cobra.Command {
 	loginCmd := &cobra.Command{
 		Use:   "login",
 		Short: "login to password manager CLI",
@@ -27,7 +26,7 @@ func NewLoginCmd(md mongo.MongoDatabase) *cobra.Command {
 				return err
 			}
 
-			decryptedVault, err := getVault(email, password, md)
+			decryptedVault, err := getVault(email, password)
 			if err != nil {
 				return err
 			}
@@ -56,8 +55,8 @@ func NewLoginCmd(md mongo.MongoDatabase) *cobra.Command {
 	return loginCmd
 }
 
-func getVault(email string, password string, md mongo.MongoDatabase) ([]byte, error) {
-	doc, err := md.Find(email)
+func getVault(email string, password string) ([]byte, error) {
+	doc, err := MongoDB.Find(email)
 	if err != nil {
 		return nil, err
 	}

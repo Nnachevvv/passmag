@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2/terminal"
@@ -41,8 +42,8 @@ var _ = Describe("Login", func() {
 
 		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
 		mockCrypt = mocks.NewMockCrypter(mockCtrl)
-
-		loginCmd = cmd.NewLoginCmd(mockMongoDB)
+		cmd.MongoDB = mockMongoDB
+		loginCmd = cmd.NewLoginCmd()
 		cmd.Crypt = mockCrypt
 
 		loginCmd.SetArgs([]string{})
@@ -57,7 +58,6 @@ var _ = Describe("Login", func() {
 
 	Context("with valid account", func() {
 		It("contains account in db", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 
@@ -83,6 +83,69 @@ var _ = Describe("Login", func() {
 
 			err = loginCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
+
+			c.Tty().Close()
+			<-done
+			fmt.Fprintf(ginkgo.GinkgoWriter, "--- Terminal ---\n%s\n----------------\n", expect.StripTrailingEmptyLines(state.String()))
+		})
+	})
+
+	Context("with wrong password", func() {
+		It("returns err", func() {
+			defer c.Close()
+			done := make(chan struct{})
+
+			go func() {
+				defer close(done)
+				c.ExpectString("Enter your email address:")
+				c.SendLine("dummy")
+				c.ExpectString("email should be longer than 8 characters")
+				c.SendLine("test-dummy2@mail.com")
+				c.ExpectString("Enter your  master password:")
+				c.SendLine("test")
+				c.ExpectString("password should be longer than 8 characters")
+				c.SendLine("test-dummy")
+				c.ExpectEOF()
+			}()
+			expectedEmail := "dummytest-dummy2@mail.com"
+			expectedPassword := "test-dummy"
+			vaultPwd := argon2.IDKey([]byte(expectedPassword), []byte(expectedEmail), 1, 64*1024, 4, 32)
+			err := errors.New("Mock Error")
+			mockMongoDB.EXPECT().Find("dummytest-dummy2@mail.com").Return(primitive.M{"vault": primitive.Binary{Data: []byte("testValueIn")}}, nil)
+			mockCrypt.EXPECT().Decrypt(gomock.Any(), vaultPwd).Return([]byte{}, err)
+
+			err = loginCmd.Execute()
+			Expect(err).Should(HaveOccurred())
+
+			c.Tty().Close()
+			<-done
+			fmt.Fprintf(ginkgo.GinkgoWriter, "--- Terminal ---\n%s\n----------------\n", expect.StripTrailingEmptyLines(state.String()))
+		})
+	})
+
+	Context("with account that not exist", func() {
+		It("returns err", func() {
+			defer c.Close()
+			done := make(chan struct{})
+
+			go func() {
+				defer close(done)
+				c.ExpectString("Enter your email address:")
+				c.SendLine("dummy")
+				c.ExpectString("email should be longer than 8 characters")
+				c.SendLine("test-dummy2@mail.com")
+				c.ExpectString("Enter your  master password:")
+				c.SendLine("test")
+				c.ExpectString("password should be longer than 8 characters")
+				c.SendLine("test-dummy")
+				c.ExpectEOF()
+			}()
+
+			err := errors.New("Mock Error")
+			mockMongoDB.EXPECT().Find("dummytest-dummy2@mail.com").Return(primitive.M{}, err)
+
+			err = loginCmd.Execute()
+			Expect(err).Should(HaveOccurred())
 
 			c.Tty().Close()
 			<-done

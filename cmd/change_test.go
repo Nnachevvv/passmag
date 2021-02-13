@@ -33,7 +33,7 @@ var _ = Describe("Change", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 
 		changeCmd = cmd.NewChangeCmd()
@@ -51,7 +51,6 @@ var _ = Describe("Change", func() {
 	})
 	Context("pass existing valid name", func() {
 		It("gets vault, and change password for given name", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 

@@ -21,15 +21,19 @@ var (
 		Short: "A password manager used to store securely passwords",
 		Long:  `passmag`,
 	}
+
 	// Crypt is used to mock and encapsulated abstract encrypt functionality.
 	Crypt crypt.Crypter
+
+	// MongoDB is used to mock and encapsulated abstract database functionality.
+	MongoDB mongo.MongoDatabase
 )
 
 func init() {
 	Stdio = terminal.Stdio{In: os.Stdin, Out: os.Stdout, Err: os.Stderr}
 
-	rootCmd.AddCommand(NewLoginCmd(&service))
-	rootCmd.AddCommand(NewInitCmd(&service))
+	rootCmd.AddCommand(NewLoginCmd())
+	rootCmd.AddCommand(NewInitCmd())
 	rootCmd.AddCommand(NewRemoveCmd())
 	rootCmd.AddCommand(NewAddCmd())
 	rootCmd.AddCommand(NewGetCmd())

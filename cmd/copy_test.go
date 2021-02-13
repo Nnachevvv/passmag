@@ -31,7 +31,7 @@ var _ = Describe("Copy", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 
 		copyCmd = cmd.NewCopyCmd()
@@ -48,7 +48,6 @@ var _ = Describe("Copy", func() {
 
 	Context("copy existing password to cpliboard", func() {
 		It("copied password to clipboard", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 
@@ -75,7 +74,6 @@ var _ = Describe("Copy", func() {
 
 	Context("get non-existing password", func() {
 		It("should throw password", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 

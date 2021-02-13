@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/cmd/mongo"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
@@ -16,7 +15,7 @@ import (
 )
 
 // NewInitCmd creates a new i
-func NewInitCmd(md mongo.MongoDatabase) *cobra.Command {
+func NewInitCmd() *cobra.Command {
 	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize email, password and master password for your password manager",
@@ -44,7 +43,7 @@ func NewInitCmd(md mongo.MongoDatabase) *cobra.Command {
 				return fmt.Errorf("failed to add user to db :%w", err)
 			}
 
-			err = md.Insert(s.Email, vaultData)
+			err = MongoDB.Insert(s.Email, vaultData)
 
 			if err != nil {
 				return err

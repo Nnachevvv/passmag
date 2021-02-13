@@ -34,12 +34,14 @@ var _ = Describe("Init", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
-		initCmd = cmd.NewInitCmd(mockMongoDB)
+		cmd.MongoDB = mockMongoDB
+
+		initCmd = cmd.NewInitCmd()
 
 		initCmd.SetArgs([]string{})
 		initCmd.SetOut(&stdOut)
@@ -53,7 +55,6 @@ var _ = Describe("Init", func() {
 
 	Context("with valid account", func() {
 		It("contains account in db", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 
@@ -85,7 +86,6 @@ var _ = Describe("Init", func() {
 
 	Context("when account is present in db", func() {
 		It("failed to insert account in db", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 

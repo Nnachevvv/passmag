@@ -33,7 +33,7 @@ var _ = Describe("Remove", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 
 		removeCmd = cmd.NewRemoveCmd()
@@ -51,7 +51,6 @@ var _ = Describe("Remove", func() {
 
 	Context("pass password which want to remove", func() {
 		It("removes password from vault", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 
@@ -82,7 +81,6 @@ var _ = Describe("Remove", func() {
 
 	Context("pass non existing ", func() {
 		It("give non existing err", func() {
-			Expect(err).ShouldNot(HaveOccurred())
 			defer c.Close()
 			done := make(chan struct{})
 

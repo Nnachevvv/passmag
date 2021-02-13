@@ -37,7 +37,7 @@ var _ = Describe("Add", func() {
 	BeforeEach(func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
-		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 		addCmd = cmd.NewAddCmd()
 

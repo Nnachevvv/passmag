@@ -44,7 +44,6 @@ func EnterSession() (User, error) {
 
 	prompt := &survey.Password{Message: "Enter your master password:"}
 	survey.AskOne(prompt, &masterPassword, survey.WithValidator(survey.Required), survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
-	fmt.Println("tuk")
 	u := User{Password: []byte(masterPassword),
 		VaultPwd:  argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32),
 		VaultPath: path}

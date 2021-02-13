@@ -7,9 +7,11 @@ import (
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/Netflix/go-expect"
+	"github.com/golang/mock/gomock"
 	"github.com/hinshun/vt10x"
 	"github.com/nnachevv/passmag/cmd"
 	"github.com/nnachevv/passmag/crypt"
+	"github.com/nnachevv/passmag/mocks"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -20,14 +22,17 @@ import (
 
 var _ = Describe("Remove", func() {
 	var (
-		c         *expect.Console
-		state     *vt10x.State
-		err       error
-		path      string
-		removeCmd *cobra.Command
-		stdOut    bytes.Buffer
-		stdErr    bytes.Buffer
-		vaultPwd  []byte
+		c           *expect.Console
+		state       *vt10x.State
+		err         error
+		path        string
+		removeCmd   *cobra.Command
+		stdOut      bytes.Buffer
+		stdErr      bytes.Buffer
+		mockCtrl    *gomock.Controller
+		mockMongoDB *mocks.MockMongoDatabase
+
+		vaultPwd []byte
 	)
 
 	BeforeEach(func() {
@@ -35,6 +40,10 @@ var _ = Describe("Remove", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
+
+		mockCtrl = gomock.NewController(GinkgoT())
+		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
+		cmd.MongoDB = mockMongoDB
 
 		removeCmd = cmd.NewRemoveCmd()
 		removeCmd.SetArgs([]string{})
@@ -47,6 +56,10 @@ var _ = Describe("Remove", func() {
 
 		viper.Set("password.path", path)
 		viper.Set("PASS_SESSION", "MRfbladUgDxLHvVWbxUjQUiZQykqiNcK")
+	})
+	AfterEach(func() {
+
+		mockCtrl.Finish()
 	})
 
 	Context("pass password which want to remove", func() {
@@ -66,6 +79,7 @@ var _ = Describe("Remove", func() {
 				c.SendLine("dummy-password")
 				c.ExpectEOF()
 			}()
+			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = removeCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 

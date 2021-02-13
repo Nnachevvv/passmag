@@ -54,30 +54,3 @@ func Execute() {
 		os.Exit(1)
 	}
 }
-
-/*// ErrCreateUser throw by db when try to insert user
-var ErrCreateUser = errors.New("failed to add user to db")
-
-// SyncVault syncs current state of vault to password if internet connection is provided
-func SyncVault(s storage.Storage, password []byte) error {
-	byteData, err := json.Marshal(s)
-	if err != nil {
-		return fmt.Errorf("failed to marshal map : %w", err)
-	}
-
-	vaultPwd := argon2.IDKey(password, []byte(s.Email), 1, 64*1024, 4, 32)
-	vaultData, err := crypt.Encrypt(byteData, vaultPwd)
-	if err != nil {
-		return fmt.Errorf("failed to add user to db :%w", err)
-	}
-
-	s.TimeCreated = time.Now()
-	service.Insert(s.Email, vaultData)
-
-	if err != nil {
-		return ErrCreateUser
-	}
-
-	return nil
-}
-*/

@@ -21,7 +21,6 @@ func NewInitCmd() *cobra.Command {
 		Short: "Initialize email, password and master password for your password manager",
 		Long:  `Set master password`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			email, password, err := initUserInput()
 			if err != nil {
 				return err

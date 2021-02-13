@@ -29,6 +29,7 @@ func NewAddCmd() *cobra.Command {
 				return err
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), "successfully added")
+
 			return nil
 		},
 	}
@@ -72,6 +73,8 @@ func addPassword(u User) error {
 	if err != nil {
 		return fmt.Errorf("failed to encrypt sessionData : %w", err)
 	}
+
+	s.SyncStorage(u.Password, MongoDB)
 
 	return nil
 }

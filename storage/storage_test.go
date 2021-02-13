@@ -4,6 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/golang/mock/gomock"
+	"github.com/nnachevv/passmag/mocks"
 	"github.com/nnachevv/passmag/storage"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -160,4 +162,30 @@ var _ = Describe("storage package", func() {
 		})
 	})
 
+	Context("storage.SyncStorage()", func() {
+		var (
+			s           storage.Storage
+			mockCtrl    *gomock.Controller
+			mockMongoDB *mocks.MockMongoDatabase
+		)
+		BeforeEach(func() {
+			mockCtrl = gomock.NewController(GinkgoT())
+			mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
+			s.Email = "dummy-email"
+		})
+
+		AfterEach(func() {
+			mockCtrl.Finish()
+		})
+
+		When("sync storage with valid args", func() {
+			It("returns nothing", func() {
+
+				mockMongoDB.EXPECT().Insert(s.Email, gomock.Any())
+				expectedPass := "dummy-password"
+				err := s.SyncStorage([]byte(expectedPass), mockMongoDB)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+		})
+	})
 })

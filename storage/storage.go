@@ -10,7 +10,10 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/nnachevv/passmag/cmd/mongo"
+	"github.com/nnachevv/passmag/crypt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/argon2"
 )
 
 //Storage contains user email and - names with password
@@ -78,6 +81,32 @@ func (s *Storage) Get(name string) (string, error) {
 	}
 
 	return string(s.Passwords[name]), nil
+}
+
+// ErrCreateUser throw by db when try to insert user
+var ErrCreateUser = errors.New("failed to add user to db")
+
+//SyncStorage syncs storage to server if user have connection , otherwise it's throw error
+func (s *Storage) SyncStorage(password []byte, mdb mongo.MongoDatabase) error {
+	s.TimeCreated = time.Now()
+	byteData, err := json.Marshal(s)
+	if err != nil {
+		return fmt.Errorf("failed to marshal map : %w", err)
+	}
+
+	vaultPwd := argon2.IDKey(password, []byte(s.Email), 1, 64*1024, 4, 32)
+	vaultData, err := crypt.Encrypt(byteData, vaultPwd)
+	if err != nil {
+		return fmt.Errorf("failed to add user to db :%w", err)
+	}
+
+	err = mdb.Insert(s.Email, vaultData)
+
+	if err != nil {
+		return ErrCreateUser
+	}
+
+	return nil
 }
 
 // Change edits password for given name

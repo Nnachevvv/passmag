@@ -7,9 +7,11 @@ import (
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/Netflix/go-expect"
+	"github.com/golang/mock/gomock"
 	"github.com/hinshun/vt10x"
 	"github.com/nnachevv/passmag/cmd"
 	"github.com/nnachevv/passmag/crypt"
+	"github.com/nnachevv/passmag/mocks"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -20,14 +22,16 @@ import (
 
 var _ = Describe("Change", func() {
 	var (
-		c         *expect.Console
-		state     *vt10x.State
-		err       error
-		path      string
-		changeCmd *cobra.Command
-		stdOut    bytes.Buffer
-		stdErr    bytes.Buffer
-		vaultPwd  []byte
+		c           *expect.Console
+		state       *vt10x.State
+		err         error
+		path        string
+		changeCmd   *cobra.Command
+		stdOut      bytes.Buffer
+		stdErr      bytes.Buffer
+		vaultPwd    []byte
+		mockCtrl    *gomock.Controller
+		mockMongoDB *mocks.MockMongoDatabase
 	)
 
 	BeforeEach(func() {
@@ -36,6 +40,9 @@ var _ = Describe("Change", func() {
 		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 
+		mockCtrl = gomock.NewController(GinkgoT())
+		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
+		cmd.MongoDB = mockMongoDB
 		changeCmd = cmd.NewChangeCmd()
 		changeCmd.SetArgs([]string{})
 		changeCmd.SetOut(&stdOut)
@@ -49,6 +56,10 @@ var _ = Describe("Change", func() {
 		viper.Set("password.path", path)
 		viper.Set("PASS_SESSION", "MRfbladUgDxLHvVWbxUjQUiZQykqiNcK")
 	})
+	AfterEach(func() {
+		mockCtrl.Finish()
+	})
+
 	Context("pass existing valid name", func() {
 		It("gets vault, and change password for given name", func() {
 			defer c.Close()
@@ -64,6 +75,7 @@ var _ = Describe("Change", func() {
 				c.SendLine("new-password")
 				c.ExpectEOF()
 			}()
+			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = changeCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 

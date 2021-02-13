@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewLogoutCmd creates a new logoutCmd
 func NewLogoutCmd() *cobra.Command {
 	logoutCmd := &cobra.Command{
 		Use:   "logout",
@@ -23,7 +24,7 @@ func NewLogoutCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to remove vault from %s, please delete it manually: %w", path, err)
 			}
-			//TODO: sync vault after logout?
+
 			return nil
 		},
 	}

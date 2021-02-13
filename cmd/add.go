@@ -6,7 +6,6 @@ import (
 
 	"github.com/nnachevv/passmag/random"
 
-	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -68,15 +67,10 @@ func addPassword(u User) error {
 		return fmt.Errorf("failed to marshal map : %w", err)
 	}
 
-	err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
+	err = Crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
 
 	if err != nil {
 		return fmt.Errorf("failed to encrypt sessionData : %w", err)
-	}
-
-	err = SyncVault(s, u.Password)
-	if err != nil && err != ErrCreateUser {
-		return err
 	}
 
 	return nil

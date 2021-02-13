@@ -29,11 +29,13 @@ func New(data map[string]interface{}, creationTime time.Time) (Storage, error) {
 	s := Storage{TimeCreated: creationTime, Email: data["email"].(string)}
 
 	s.Passwords = make(map[string][]byte)
+
 	for k := range data {
 		if k != "email" {
 			s.Passwords[k] = data[k].(primitive.Binary).Data
 		}
 	}
+
 	return s, nil
 }
 

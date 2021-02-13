@@ -9,6 +9,7 @@ import (
 	"github.com/Netflix/go-expect"
 	"github.com/hinshun/vt10x"
 	"github.com/nnachevv/passmag/cmd"
+	"github.com/nnachevv/passmag/crypt"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,8 +34,9 @@ var _ = Describe("Change", func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
 		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
-		changeCmd = cmd.NewChangeCmd()
+		cmd.Crypt = crypt.Crypt{}
 
+		changeCmd = cmd.NewChangeCmd()
 		changeCmd.SetArgs([]string{})
 		changeCmd.SetOut(&stdOut)
 		changeCmd.SetErr(&stdErr)

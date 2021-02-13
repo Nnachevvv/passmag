@@ -30,7 +30,7 @@ func Encrypt(data []byte, key []byte) ([]byte, error) {
 }
 
 // EncryptFile encrypts given data with cypher algorithm and saves it to file.
-func EncryptFile(filename string, data []byte, key []byte) error {
+func (c Crypt) EncryptFile(filename string, data []byte, key []byte) error {
 	pathDir := filepath.Dir(filename)
 
 	if _, err := os.Stat(pathDir); os.IsNotExist(err) {

@@ -1,41 +1,61 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/nnachevv/passmag/cmd/mongo"
+	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/crypto/argon2"
 )
 
-var initializeCmd = &cobra.Command{
+// NewInitCmd creates a new i
+func NewInitCmd(md mongo.MongoDatabase) *cobra.Command {
+	initCmd := &cobra.Command{
+		Use:   "init",
+		Short: "Initialize email, password and master password for your password manager",
+		Long:  `Set master password`,
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-	Use:   "init",
-	Short: "Initialize email, password and master password for your password manager",
-	Long:  `Set master password`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+			email, password, err := initUserInput()
+			if err != nil {
+				return err
+			}
 
-		email, password, err := initUserInput()
-		if err != nil {
-			return err
-		}
+			s, err := storage.New(bson.M{"email": email}, time.Now())
+			if err != nil {
+				return err
+			}
 
-		s, err := storage.New(bson.M{"email": email}, time.Now())
-		if err != nil {
-			return err
-		}
+			byteData, err := json.Marshal(s)
+			if err != nil {
+				return fmt.Errorf("failed to marshal map : %w", err)
+			}
 
-		err = SyncVault(s, []byte(password))
-		if err != nil {
-			return err
-		}
+			vaultPwd := argon2.IDKey([]byte(password), []byte(s.Email), 1, 64*1024, 4, 32)
+			vaultData, err := crypt.Encrypt(byteData, vaultPwd)
+			if err != nil {
+				return fmt.Errorf("failed to add user to db :%w", err)
+			}
 
-		fmt.Printf("%s is successfully created!\n", email)
-		return nil
-	},
+			err = md.Insert(s.Email, vaultData)
+
+			if err != nil {
+				return err
+			}
+
+			fmt.Fprintf(cmd.OutOrStdout(), "%s is successfully created!\n", email)
+			return nil
+		},
+	}
+
+	return initCmd
 }
 
 func initUserInput() (email string, password string, err error) {
@@ -50,14 +70,15 @@ func initUserInput() (email string, password string, err error) {
 			Name:   "email",
 			Prompt: &survey.Input{Message: "Enter your email address:"},
 			Validate: func(val interface{}) error {
-				email, ok := val.(string)
-				if !ok || len(email) < 8 {
+
+				if input, ok := val.(string); !ok || len(input) < 8 {
 					return errors.New("email should be longer than 8 characters")
 				}
 
-				if _, err := service.Find(email); err == nil {
+				if _, err := service.Find(val.(string)); err == nil {
 					return errors.New("email address already exist in our database")
 				}
+
 				return nil
 			},
 		},
@@ -68,6 +89,7 @@ func initUserInput() (email string, password string, err error) {
 				if str, ok := val.(string); !ok || len(str) < 8 {
 					return errors.New("password should be longer than 8 characters")
 				}
+
 				return nil
 			},
 		},
@@ -78,12 +100,13 @@ func initUserInput() (email string, password string, err error) {
 				if str, ok := val.(string); !ok || len(str) < 8 {
 					return errors.New("password should be longer than 8 characters")
 				}
+
 				return nil
 			},
 		},
 	}
 
-	err = survey.Ask(qs, &answers)
+	err = survey.Ask(qs, &answers, survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 	if err != nil {
 		return "", "", fmt.Errorf("failed to process input : %w", err)
 	}
@@ -91,5 +114,6 @@ func initUserInput() (email string, password string, err error) {
 	if answers.MasterPassword != answers.ConfirmPassword {
 		return "", "", errors.New("passwords must match")
 	}
+
 	return answers.Email, answers.MasterPassword, nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/Netflix/go-expect"
 	"github.com/hinshun/vt10x"
 	"github.com/nnachevv/passmag/cmd"
+	"github.com/nnachevv/passmag/crypt"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -17,7 +18,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-var _ = Describe("Change", func() {
+var _ = Describe("Edit", func() {
 	var (
 		c        *expect.Console
 		state    *vt10x.State
@@ -33,8 +34,9 @@ var _ = Describe("Change", func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
 		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
-		editCmd = cmd.NewEditCmd()
+		cmd.Crypt = crypt.Crypt{}
 
+		editCmd = cmd.NewEditCmd()
 		editCmd.SetArgs([]string{})
 		editCmd.SetOut(&stdOut)
 		editCmd.SetErr(&stdErr)

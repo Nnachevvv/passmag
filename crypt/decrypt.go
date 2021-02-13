@@ -8,13 +8,13 @@ import (
 )
 
 //Decrypt decrypts data by given passphrase
-func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
-	c, err := aes.NewCipher(key)
+func (c Crypt) Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 
-	gcm, err := cipher.NewGCM(c)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, err
 	}
@@ -29,13 +29,13 @@ func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 }
 
 // DecryptFile decrypts file by given password
-func DecryptFile(filename string, key []byte) ([]byte, error) {
+func (c Crypt) DecryptFile(filename string, key []byte) ([]byte, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	byteEncrypted, err := Decrypt(data, key)
+	byteEncrypted, err := c.Decrypt(data, key)
 	if err != nil {
 		return []byte{}, err
 	}

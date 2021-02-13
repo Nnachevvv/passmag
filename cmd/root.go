@@ -1,19 +1,14 @@
 package cmd
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/nnachevv/passmag/cmd/mongo"
 	"github.com/nnachevv/passmag/crypt"
-	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/crypto/argon2"
 )
 
 var (
@@ -26,13 +21,15 @@ var (
 		Short: "A password manager used to store securely passwords",
 		Long:  `passmag`,
 	}
+	// Crypt is used to mock and encapsulated abstract encrypt functionality.
+	Crypt crypt.Crypter
 )
 
 func init() {
-	Stdio = terminal.Stdio{os.Stdin, os.Stdout, os.Stderr}
+	Stdio = terminal.Stdio{In: os.Stdin, Out: os.Stdout, Err: os.Stderr}
 
-	rootCmd.AddCommand(loginCmd)
-	rootCmd.AddCommand(initializeCmd)
+	rootCmd.AddCommand(NewLoginCmd(&service))
+	rootCmd.AddCommand(NewInitCmd(&service))
 	rootCmd.AddCommand(NewRemoveCmd())
 	rootCmd.AddCommand(NewAddCmd())
 	rootCmd.AddCommand(NewGetCmd())
@@ -54,7 +51,7 @@ func Execute() {
 	}
 }
 
-// ErrCreateUser throw by db when try to insert user
+/*// ErrCreateUser throw by db when try to insert user
 var ErrCreateUser = errors.New("failed to add user to db")
 
 // SyncVault syncs current state of vault to password if internet connection is provided
@@ -79,3 +76,4 @@ func SyncVault(s storage.Storage, password []byte) error {
 
 	return nil
 }
+*/

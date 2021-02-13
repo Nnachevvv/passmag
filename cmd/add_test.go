@@ -38,6 +38,7 @@ var _ = Describe("Add", func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
 		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
+		cmd.Crypt = crypt.Crypt{}
 		addCmd = cmd.NewAddCmd()
 
 		addCmd.SetArgs([]string{})
@@ -224,7 +225,7 @@ func tempFile(path string) (string, error) {
 }
 
 func getAddedPassword(path string, name string, vaultPwd []byte) (string, bool) {
-	vaultData, err := crypt.DecryptFile(path, vaultPwd)
+	vaultData, err := cmd.Crypt.DecryptFile(path, vaultPwd)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	var s storage.Storage

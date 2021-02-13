@@ -9,6 +9,7 @@ import (
 	"github.com/Netflix/go-expect"
 	"github.com/hinshun/vt10x"
 	"github.com/nnachevv/passmag/cmd"
+	"github.com/nnachevv/passmag/crypt"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,8 +34,9 @@ var _ = Describe("Remove", func() {
 		c, state, err = vt10x.NewVT10XConsole()
 		Expect(err).ShouldNot(HaveOccurred())
 		cmd.Stdio = terminal.Stdio{c.Tty(), c.Tty(), c.Tty()}
-		removeCmd = cmd.NewRemoveCmd()
+		cmd.Crypt = crypt.Crypt{}
 
+		removeCmd = cmd.NewRemoveCmd()
 		removeCmd.SetArgs([]string{})
 		removeCmd.SetOut(&stdOut)
 		removeCmd.SetErr(&stdErr)

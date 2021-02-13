@@ -6,14 +6,12 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
 )
 
 // NewChangeCmd creates a new newCmd
 func NewChangeCmd() *cobra.Command {
-
 	changeCmd := &cobra.Command{
 
 		Use:   "change",
@@ -66,15 +64,10 @@ func NewChangeCmd() *cobra.Command {
 				return fmt.Errorf("failed to marshal map : %w", err)
 			}
 
-			err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
+			err = Crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
 
 			if err != nil {
 				return fmt.Errorf("failed to encrypt your data: %w", err)
-			}
-
-			err = SyncVault(s, u.Password)
-			if err != nil && err != ErrCreateUser {
-				return err
 			}
 
 			return nil

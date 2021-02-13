@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/cobra"
 )
@@ -69,16 +68,12 @@ func NewEditCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to marshal map : %w", err)
 			}
-			err = crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
+			err = Crypt.EncryptFile(u.VaultPath, byteData, u.VaultPwd)
 
 			if err != nil {
 				return fmt.Errorf("failed to encrypt sessionData : %w", err)
 			}
 
-			err = SyncVault(s, u.Password)
-			if err != nil && err != ErrCreateUser {
-				return err
-			}
 			fmt.Fprintln(cmd.OutOrStdout(), "successfully moved your password")
 
 			return nil

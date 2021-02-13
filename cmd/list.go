@@ -28,7 +28,7 @@ func NewListCmd() *cobra.Command {
 			}
 
 			for n, p := range s.Passwords {
-				fmt.Printf("%s : %s\n", n, string(p))
+				fmt.Fprintf(cmd.OutOrStdout(), "%s : %s\n", n, string(p))
 			}
 
 			return nil

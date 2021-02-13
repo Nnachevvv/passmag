@@ -17,6 +17,13 @@ type Service struct {
 	client *mongo.Client
 }
 
+// MongoDatabase is used as interface to represent database operation
+type MongoDatabase interface {
+	Connect()
+	Insert(string, []byte) error
+	Find(string) (bson.M, error)
+}
+
 //Connect connects to mongoDB
 func (s *Service) Connect() {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))

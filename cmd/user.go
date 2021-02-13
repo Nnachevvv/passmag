@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/crypt"
 	"github.com/nnachevv/passmag/storage"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/argon2"
@@ -49,19 +48,11 @@ func EnterSession() (User, error) {
 		VaultPwd:  argon2.IDKey([]byte(masterPassword), []byte(sessionKey), 1, 64*1024, 4, 32),
 		VaultPath: path}
 
-	err = u.loadVault()
+	vaultData, err := Crypt.DecryptFile(u.VaultPath, u.VaultPwd)
 	if err != nil {
-		return User{}, err
-	}
-	return u, err
-}
-
-func (u *User) loadVault() error {
-	vaultData, err := crypt.DecryptFile(u.VaultPath, u.VaultPwd)
-	if err != nil {
-		return fmt.Errorf("failed to load your vault try again : %w", err)
+		return User{}, fmt.Errorf("failed to load your vault try again : %w", err)
 	}
 
 	u.VaultData = vaultData
-	return nil
+	return u, err
 }

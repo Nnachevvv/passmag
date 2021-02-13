@@ -40,7 +40,7 @@ func init() {
 	rootCmd.AddCommand(NewCopyCmd())
 	rootCmd.AddCommand(NewEditCmd())
 	rootCmd.AddCommand(NewChangeCmd())
-	rootCmd.AddCommand(logoutCmd)
+	rootCmd.AddCommand(NewLogoutCmd())
 	rootCmd.AddCommand(NewListCmd())
 
 	service.Connect()

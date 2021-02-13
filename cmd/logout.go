@@ -8,22 +8,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var logoutCmd = &cobra.Command{
+func NewLogoutCmd() *cobra.Command {
+	logoutCmd := &cobra.Command{
+		Use:   "logout",
+		Short: "Logout from logged user",
+		Long:  `Logout from logged user and delete currently download vault`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			path, err := storage.FilePath()
+			if err != nil {
+				return err
+			}
 
-	Use:   "logout",
-	Short: "Logout from logged user",
-	Long:  `Logout from logged user and delete currently download vault`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		path, err := storage.FilePath()
-		if err != nil {
-			return err
-		}
-
-		err = os.Remove(path)
-		if err != nil {
-			return fmt.Errorf("failed to remove vault from %s, please delete it manually: %w", path, err)
-		}
-		//TODO: sync vault after logout?
-		return nil
-	},
+			err = os.Remove(path)
+			if err != nil {
+				return fmt.Errorf("failed to remove vault from %s, please delete it manually: %w", path, err)
+			}
+			//TODO: sync vault after logout?
+			return nil
+		},
+	}
+	return logoutCmd
 }

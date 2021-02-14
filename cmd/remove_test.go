@@ -22,15 +22,15 @@ import (
 
 var _ = Describe("Remove", func() {
 	var (
-		c           *expect.Console
-		state       *vt10x.State
-		err         error
-		path        string
-		removeCmd   *cobra.Command
-		stdOut      bytes.Buffer
-		stdErr      bytes.Buffer
-		mockCtrl    *gomock.Controller
-		mockMongoDB *mocks.MockMongoDatabase
+		c         *expect.Console
+		state     *vt10x.State
+		err       error
+		path      string
+		removeCmd *cobra.Command
+		stdOut    bytes.Buffer
+		stdErr    bytes.Buffer
+		mockCtrl  *gomock.Controller
+		mockDB    *mocks.MockDatabase
 
 		vaultPwd []byte
 	)
@@ -42,8 +42,8 @@ var _ = Describe("Remove", func() {
 		cmd.Crypt = crypt.Crypt{}
 
 		mockCtrl = gomock.NewController(GinkgoT())
-		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
-		cmd.MongoDB = mockMongoDB
+		mockDB = mocks.NewMockDatabase(mockCtrl)
+		cmd.MongoDB.Database = mockDB
 
 		removeCmd = cmd.NewRemoveCmd()
 		removeCmd.SetArgs([]string{})
@@ -79,7 +79,7 @@ var _ = Describe("Remove", func() {
 				c.SendLine("dummy-password")
 				c.ExpectEOF()
 			}()
-			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
+			mockDB.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = removeCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 

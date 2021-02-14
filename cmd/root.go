@@ -13,7 +13,8 @@ import (
 
 var (
 	cfgFile string
-	service mongo.Service
+	// MongoDB is used to mock and encapsulated abstract database functionality.
+	MongoDB mongo.Service
 	// Stdio is used for testing virtuall terminal.
 	Stdio   terminal.Stdio
 	rootCmd = &cobra.Command{
@@ -24,9 +25,6 @@ var (
 
 	// Crypt is used to mock and encapsulated abstract encrypt functionality.
 	Crypt crypt.Crypter
-
-	// MongoDB is used to mock and encapsulated abstract database functionality.
-	MongoDB mongo.MongoDatabase
 )
 
 func init() {
@@ -42,8 +40,7 @@ func init() {
 	rootCmd.AddCommand(NewChangeCmd())
 	rootCmd.AddCommand(NewLogoutCmd())
 	rootCmd.AddCommand(NewListCmd())
-
-	service.Connect()
+	MongoDB.Connect()
 	viper.AutomaticEnv()
 }
 
@@ -53,4 +50,5 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	MongoDB.Close()
 }

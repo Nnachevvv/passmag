@@ -14,11 +14,12 @@ import (
 
 // Service contains mongo db client
 type Service struct {
-	client *mongo.Client
+	client   *mongo.Client
+	Database Database
 }
 
-// MongoDatabase is used as interface to represent database operation
-type MongoDatabase interface {
+// Database is used as interface to represent database operation
+type Database interface {
 	Connect()
 	Insert(string, []byte) error
 	Find(string) (bson.M, error)
@@ -74,4 +75,9 @@ func (s *Service) Find(email string) (bson.M, error) {
 	}
 
 	return record, nil
+}
+
+// Close closes service
+func (s *Service) Close() {
+	s.Close()
 }

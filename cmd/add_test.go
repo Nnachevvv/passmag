@@ -26,16 +26,16 @@ import (
 
 var _ = Describe("Add", func() {
 	var (
-		c           *expect.Console
-		state       *vt10x.State
-		err         error
-		path        string
-		addCmd      *cobra.Command
-		stdOut      bytes.Buffer
-		stdErr      bytes.Buffer
-		vaultPwd    []byte
-		mockCtrl    *gomock.Controller
-		mockMongoDB *mocks.MockMongoDatabase
+		c            *expect.Console
+		state        *vt10x.State
+		err          error
+		path         string
+		addCmd       *cobra.Command
+		stdOut       bytes.Buffer
+		stdErr       bytes.Buffer
+		vaultPwd     []byte
+		mockCtrl     *gomock.Controller
+		mockDatabase *mocks.MockDatabase
 	)
 
 	BeforeEach(func() {
@@ -44,8 +44,8 @@ var _ = Describe("Add", func() {
 		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 		mockCtrl = gomock.NewController(GinkgoT())
-		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
-		cmd.MongoDB = mockMongoDB
+		mockDatabase = mocks.NewMockDatabase(mockCtrl)
+		cmd.MongoDB.Database = mockDatabase
 
 		addCmd = cmd.NewAddCmd()
 		addCmd.SetArgs([]string{})
@@ -81,7 +81,8 @@ var _ = Describe("Add", func() {
 				c.SendLine("dummy-password")
 				c.ExpectEOF()
 			}()
-			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
+
+			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 			password, ok := getAddedPassword(path, "dummy-name", vaultPwd)
@@ -110,7 +111,8 @@ var _ = Describe("Add", func() {
 				c.ExpectEOF()
 
 			}()
-			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
+
+			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 			_, ok := getAddedPassword(path, "dummy-random", vaultPwd)
@@ -143,7 +145,8 @@ var _ = Describe("Add", func() {
 				c.ExpectEOF()
 
 			}()
-			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
+
+			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 			password, ok := getAddedPassword(path, "exist", vaultPwd)
@@ -176,7 +179,8 @@ var _ = Describe("Add", func() {
 				c.SendLine("y")
 				c.ExpectEOF()
 			}()
-			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
+
+			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = addCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 			password, ok := getAddedPassword(path, "exist@mail.com", vaultPwd)

@@ -50,7 +50,7 @@ func NewRemoveCmd() *cobra.Command {
 				return fmt.Errorf("failed to encrypt sessionData : %w", err)
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), "successfully removed password")
-			s.SyncStorage(u.Password, MongoDB)
+			s.SyncStorage(u.Password, MongoDB.Database)
 
 			return nil
 		},

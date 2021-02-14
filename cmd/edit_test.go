@@ -22,16 +22,16 @@ import (
 
 var _ = Describe("Edit", func() {
 	var (
-		c           *expect.Console
-		state       *vt10x.State
-		err         error
-		path        string
-		editCmd     *cobra.Command
-		stdOut      bytes.Buffer
-		stdErr      bytes.Buffer
-		vaultPwd    []byte
-		mockCtrl    *gomock.Controller
-		mockMongoDB *mocks.MockMongoDatabase
+		c            *expect.Console
+		state        *vt10x.State
+		err          error
+		path         string
+		editCmd      *cobra.Command
+		stdOut       bytes.Buffer
+		stdErr       bytes.Buffer
+		vaultPwd     []byte
+		mockCtrl     *gomock.Controller
+		mockDatabase *mocks.MockDatabase
 	)
 
 	BeforeEach(func() {
@@ -40,8 +40,8 @@ var _ = Describe("Edit", func() {
 		cmd.Stdio = terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 		cmd.Crypt = crypt.Crypt{}
 		mockCtrl = gomock.NewController(GinkgoT())
-		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
-		cmd.MongoDB = mockMongoDB
+		mockDatabase = mocks.NewMockDatabase(mockCtrl)
+		cmd.MongoDB.Database = mockDatabase
 		editCmd = cmd.NewEditCmd()
 		editCmd.SetArgs([]string{})
 		editCmd.SetOut(&stdOut)
@@ -76,7 +76,7 @@ var _ = Describe("Edit", func() {
 				c.SendLine("new@mail.com")
 				c.ExpectEOF()
 			}()
-			mockMongoDB.EXPECT().Insert("exist@mail.com", gomock.Any())
+			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any())
 			err = editCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 

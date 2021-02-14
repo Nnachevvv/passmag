@@ -70,7 +70,7 @@ func NewChangeCmd() *cobra.Command {
 				return fmt.Errorf("failed to encrypt your data: %w", err)
 			}
 
-			s.SyncStorage(u.Password, MongoDB)
+			s.SyncStorage(u.Password, MongoDB.Database)
 
 			return nil
 		},

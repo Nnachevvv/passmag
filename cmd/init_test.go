@@ -16,6 +16,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var _ = Describe("Init", func() {
@@ -27,8 +28,8 @@ var _ = Describe("Init", func() {
 		stdOut  bytes.Buffer
 		stdErr  bytes.Buffer
 
-		mockCtrl    *gomock.Controller
-		mockMongoDB *mocks.MockMongoDatabase
+		mockCtrl     *gomock.Controller
+		mockDatabase *mocks.MockDatabase
 	)
 
 	BeforeEach(func() {
@@ -38,8 +39,8 @@ var _ = Describe("Init", func() {
 		cmd.Crypt = crypt.Crypt{}
 
 		mockCtrl = gomock.NewController(GinkgoT())
-		mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
-		cmd.MongoDB = mockMongoDB
+		mockDatabase = mocks.NewMockDatabase(mockCtrl)
+		cmd.MongoDB.Database = mockDatabase
 
 		initCmd = cmd.NewInitCmd()
 
@@ -63,7 +64,7 @@ var _ = Describe("Init", func() {
 				c.ExpectString("Enter your email address:")
 				c.SendLine("dummy")
 				c.ExpectString("email should be longer than 8 characters")
-				c.SendLine("test-dummy2@mail.com")
+				c.SendLine("test-dummy@mail.com")
 				c.ExpectString("Enter your password:")
 				c.SendLine("test")
 				c.ExpectString("password should be longer than 8 characters")
@@ -73,7 +74,9 @@ var _ = Describe("Init", func() {
 				c.ExpectEOF()
 			}()
 
-			mockMongoDB.EXPECT().Insert("dummytest-dummy2@mail.com", gomock.Any())
+			mockError := errors.New("Mock error")
+			mockDatabase.EXPECT().Find("dummytest-dummy@mail.com").Return(bson.M{}, mockError)
+			mockDatabase.EXPECT().Insert("dummytest-dummy@mail.com", gomock.Any())
 
 			err = initCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
@@ -94,7 +97,7 @@ var _ = Describe("Init", func() {
 				c.ExpectString("Enter your email address:")
 				c.SendLine("dummy")
 				c.ExpectString("email should be longer than 8 characters")
-				c.SendLine("test-dummy2@mail.com")
+				c.SendLine("test-dummy@mail.com")
 				c.ExpectString("Enter your password:")
 				c.SendLine("test")
 				c.ExpectString("password should be longer than 8 characters")
@@ -105,7 +108,9 @@ var _ = Describe("Init", func() {
 			}()
 
 			expectedErr := errors.New("failed to insert data to db")
-			mockMongoDB.EXPECT().Insert("dummytest-dummy2@mail.com", gomock.Any()).Return(expectedErr)
+			mockError := errors.New("Mock error")
+			mockDatabase.EXPECT().Find("dummytest-dummy@mail.com").Return(bson.M{}, mockError)
+			mockDatabase.EXPECT().Insert("dummytest-dummy@mail.com", gomock.Any()).Return(expectedErr)
 
 			err = initCmd.Execute()
 			Expect(err).To(Equal(expectedErr))

@@ -74,7 +74,7 @@ func addPassword(u User) error {
 		return fmt.Errorf("failed to encrypt sessionData : %w", err)
 	}
 
-	s.SyncStorage(u.Password, MongoDB)
+	s.SyncStorage(u.Password, MongoDB.Database)
 
 	return nil
 }

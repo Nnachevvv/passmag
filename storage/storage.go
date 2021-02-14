@@ -87,7 +87,7 @@ func (s *Storage) Get(name string) (string, error) {
 var ErrCreateUser = errors.New("failed to add user to db")
 
 //SyncStorage syncs storage to server if user have connection , otherwise it's throw error
-func (s *Storage) SyncStorage(password []byte, mdb mongo.MongoDatabase) error {
+func (s *Storage) SyncStorage(password []byte, mdb mongo.Database) error {
 	s.TimeCreated = time.Now()
 	byteData, err := json.Marshal(s)
 	if err != nil {

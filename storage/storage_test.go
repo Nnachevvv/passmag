@@ -164,13 +164,13 @@ var _ = Describe("storage package", func() {
 
 	Context("storage.SyncStorage()", func() {
 		var (
-			s           storage.Storage
-			mockCtrl    *gomock.Controller
-			mockMongoDB *mocks.MockMongoDatabase
+			s            storage.Storage
+			mockCtrl     *gomock.Controller
+			mockDatabase *mocks.MockDatabase
 		)
 		BeforeEach(func() {
 			mockCtrl = gomock.NewController(GinkgoT())
-			mockMongoDB = mocks.NewMockMongoDatabase(mockCtrl)
+			mockDatabase = mocks.NewMockDatabase(mockCtrl)
 			s.Email = "dummy-email"
 		})
 
@@ -181,9 +181,9 @@ var _ = Describe("storage package", func() {
 		When("sync storage with valid args", func() {
 			It("returns nothing", func() {
 
-				mockMongoDB.EXPECT().Insert(s.Email, gomock.Any())
+				mockDatabase.EXPECT().Insert(s.Email, gomock.Any())
 				expectedPass := "dummy-password"
-				err := s.SyncStorage([]byte(expectedPass), mockMongoDB)
+				err := s.SyncStorage([]byte(expectedPass), mockDatabase)
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 		})

@@ -16,8 +16,8 @@ import (
 func NewAddCmd() *cobra.Command {
 	addCmd := &cobra.Command{
 		Use:   "add",
-		Short: "Initialize email, password and master password for your password manager",
-		Long:  `Set master password`,
+		Short: "Add password to your vault",
+		Long:  `Add password to email/username. Password can be randomly generated.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			u, err := EnterSession()
 			if err != nil {

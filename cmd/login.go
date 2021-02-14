@@ -19,7 +19,7 @@ func NewLoginCmd() *cobra.Command {
 	loginCmd := &cobra.Command{
 		Use:   "login",
 		Short: "login to password manager CLI",
-		Long:  "login to password manager CLI and seal vault locally with generated random description key",
+		Long:  "login to password manager CLI and seal vault locally with generated random pass key",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			email, password, err := loginUserInput()
 			if err != nil {

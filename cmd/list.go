@@ -13,7 +13,7 @@ func NewListCmd() *cobra.Command {
 	listCmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all password from your vault",
-		Long:  `Ask for authorization and lists all password from your vault`,
+		Long:  "Lists all password from your vault in plain text",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			u, err := EnterSession()
 			if err != nil {

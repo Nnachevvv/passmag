@@ -33,6 +33,7 @@ var (
 func init() {
 	Stdio = terminal.Stdio{In: os.Stdin, Out: os.Stdout, Err: os.Stderr}
 	MongoDB = &mongoCli.Service{}
+	Crypt = &crypt.Crypt{}
 	rootCmd.AddCommand(NewLoginCmd())
 	rootCmd.AddCommand(NewInitCmd())
 	rootCmd.AddCommand(NewRemoveCmd())
@@ -54,5 +55,4 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
 }

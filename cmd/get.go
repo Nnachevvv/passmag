@@ -14,7 +14,7 @@ func NewGetCmd() *cobra.Command {
 	getCmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get password from your vault",
-		Long:  `Get password if exist from your vault`,
+		Long:  `Get password if exist , otherwise error will be thrown`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			pass, err := getPassword()
 			if err != nil {

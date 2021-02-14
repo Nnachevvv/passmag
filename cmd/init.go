@@ -18,8 +18,8 @@ import (
 func NewInitCmd() *cobra.Command {
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initialize email, password and master password for your password manager",
-		Long:  `Set master password`,
+		Short: "Setup account",
+		Long:  `Initialize your vault with email and masterpassword`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			email, password, err := initUserInput()
 			if err != nil {

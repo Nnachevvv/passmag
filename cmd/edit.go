@@ -14,7 +14,7 @@ func NewEditCmd() *cobra.Command {
 	editCmd := &cobra.Command{
 		Use:   "edit",
 		Short: "Set new name for password",
-		Long:  `Set master password`,
+		Long:  `Ask name of password which user will want to change `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			u, err := EnterSession()
 			if err != nil {

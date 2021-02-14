@@ -10,7 +10,7 @@ func NewCopyCmd() *cobra.Command {
 	copyCmd := &cobra.Command{
 		Use:   "cp",
 		Short: "Copy password to cpliboard",
-		Long:  `Get password if exist and copy to clipboard.`,
+		Long:  `Copy password to clipboard if exist , otherwise error will be thrown.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			pass, err := getPassword()
 			if err != nil {

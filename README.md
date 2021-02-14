@@ -66,6 +66,10 @@ Rename an already added password:
 
     $ passmag edit
 
+Change an already added password:
+
+    $ passmag edit
+
 Get password from your vault:
 
     $ passmag get 

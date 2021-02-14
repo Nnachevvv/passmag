@@ -41,7 +41,7 @@ var _ = Describe("Edit", func() {
 		cmd.Crypt = crypt.Crypt{}
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockDatabase = mocks.NewMockDatabase(mockCtrl)
-		cmd.MongoDB.Database = mockDatabase
+		cmd.MongoDB = mockDatabase
 		editCmd = cmd.NewEditCmd()
 		editCmd.SetArgs([]string{})
 		editCmd.SetOut(&stdOut)
@@ -76,7 +76,7 @@ var _ = Describe("Edit", func() {
 				c.SendLine("new@mail.com")
 				c.ExpectEOF()
 			}()
-			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any())
+			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any(), gomock.Any())
 			err = editCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 

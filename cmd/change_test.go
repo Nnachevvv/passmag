@@ -42,7 +42,7 @@ var _ = Describe("Change", func() {
 
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockDatabase = mocks.NewMockDatabase(mockCtrl)
-		cmd.MongoDB.Database = mockDatabase
+		cmd.MongoDB = mockDatabase
 		changeCmd = cmd.NewChangeCmd()
 		changeCmd.SetArgs([]string{})
 		changeCmd.SetOut(&stdOut)
@@ -75,7 +75,7 @@ var _ = Describe("Change", func() {
 				c.SendLine("new-password")
 				c.ExpectEOF()
 			}()
-			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any())
+			mockDatabase.EXPECT().Insert("exist@mail.com", gomock.Any(), gomock.Any())
 			err = changeCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 

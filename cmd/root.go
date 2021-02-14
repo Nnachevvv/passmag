@@ -5,16 +5,17 @@ import (
 	"os"
 
 	"github.com/AlecAivazis/survey/v2/terminal"
-	"github.com/nnachevv/passmag/cmd/mongo"
+	mongoCli "github.com/nnachevv/passmag/cmd/mongo"
 	"github.com/nnachevv/passmag/crypt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
 	cfgFile string
 	// MongoDB is used to mock and encapsulated abstract database functionality.
-	MongoDB mongo.Service
+	MongoDB mongoCli.Database
 	// Stdio is used for testing virtuall terminal.
 	Stdio   terminal.Stdio
 	rootCmd = &cobra.Command{
@@ -23,13 +24,15 @@ var (
 		Long:  `passmag`,
 	}
 
+	// Client is used to mock represent Client for mongodb
+	Client *mongo.Client
 	// Crypt is used to mock and encapsulated abstract encrypt functionality.
 	Crypt crypt.Crypter
 )
 
 func init() {
 	Stdio = terminal.Stdio{In: os.Stdin, Out: os.Stdout, Err: os.Stderr}
-
+	MongoDB = &mongoCli.Service{}
 	rootCmd.AddCommand(NewLoginCmd())
 	rootCmd.AddCommand(NewInitCmd())
 	rootCmd.AddCommand(NewRemoveCmd())
@@ -40,7 +43,8 @@ func init() {
 	rootCmd.AddCommand(NewChangeCmd())
 	rootCmd.AddCommand(NewLogoutCmd())
 	rootCmd.AddCommand(NewListCmd())
-	MongoDB.Connect()
+	Client = mongoCli.Connect()
+
 	viper.AutomaticEnv()
 }
 
@@ -50,5 +54,5 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	MongoDB.Close()
+
 }

@@ -56,7 +56,7 @@ func NewLoginCmd() *cobra.Command {
 }
 
 func getVault(email string, password string) ([]byte, error) {
-	doc, err := MongoDB.Database.Find(email)
+	doc, err := MongoDB.Find(email, Client)
 	if err != nil {
 		return nil, err
 	}

@@ -10,9 +10,10 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/nnachevv/passmag/cmd/mongo"
+	mongoCli "github.com/nnachevv/passmag/cmd/mongo"
 	"github.com/nnachevv/passmag/crypt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -87,7 +88,7 @@ func (s *Storage) Get(name string) (string, error) {
 var ErrCreateUser = errors.New("failed to add user to db")
 
 //SyncStorage syncs storage to server if user have connection , otherwise it's throw error
-func (s *Storage) SyncStorage(password []byte, mdb mongo.Database) error {
+func (s *Storage) SyncStorage(password []byte, mdb mongoCli.Database, client *mongo.Client) error {
 	s.TimeCreated = time.Now()
 	byteData, err := json.Marshal(s)
 	if err != nil {
@@ -100,7 +101,7 @@ func (s *Storage) SyncStorage(password []byte, mdb mongo.Database) error {
 		return fmt.Errorf("failed to add user to db :%w", err)
 	}
 
-	err = mdb.Insert(s.Email, vaultData)
+	err = mdb.Insert(s.Email, vaultData, client)
 
 	if err != nil {
 		return ErrCreateUser

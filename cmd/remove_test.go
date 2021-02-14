@@ -43,7 +43,7 @@ var _ = Describe("Remove", func() {
 
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockDB = mocks.NewMockDatabase(mockCtrl)
-		cmd.MongoDB.Database = mockDB
+		cmd.MongoDB = mockDB
 
 		removeCmd = cmd.NewRemoveCmd()
 		removeCmd.SetArgs([]string{})
@@ -79,7 +79,7 @@ var _ = Describe("Remove", func() {
 				c.SendLine("dummy-password")
 				c.ExpectEOF()
 			}()
-			mockDB.EXPECT().Insert("exist@mail.com", gomock.Any())
+			mockDB.EXPECT().Insert("exist@mail.com", gomock.Any(), gomock.Any())
 			err = removeCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
 

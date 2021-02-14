@@ -42,7 +42,7 @@ func NewInitCmd() *cobra.Command {
 				return fmt.Errorf("failed to add user to db :%w", err)
 			}
 
-			err = MongoDB.Database.Insert(s.Email, vaultData)
+			err = MongoDB.Insert(s.Email, vaultData, Client)
 
 			if err != nil {
 				return err
@@ -72,9 +72,7 @@ func initUserInput() (email string, password string, err error) {
 				if input, ok := val.(string); !ok || len(input) < 8 {
 					return errors.New("email should be longer than 8 characters")
 				}
-				fmt.Println("tuk11")
-				fmt.Println(val.(string))
-				if _, err := MongoDB.Database.Find(val.(string)); err == nil {
+				if _, err := MongoDB.Find(val.(string), Client); err == nil {
 					return errors.New("email address already exist in our database")
 				}
 
@@ -104,7 +102,6 @@ func initUserInput() (email string, password string, err error) {
 			},
 		},
 	}
-
 	err = survey.Ask(qs, &answers, survey.WithStdio(Stdio.In, Stdio.Out, Stdio.Err))
 	if err != nil {
 		return "", "", fmt.Errorf("failed to process input : %w", err)

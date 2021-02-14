@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var _ = Describe("storage package", func() {
@@ -181,9 +182,9 @@ var _ = Describe("storage package", func() {
 		When("sync storage with valid args", func() {
 			It("returns nothing", func() {
 
-				mockDatabase.EXPECT().Insert(s.Email, gomock.Any())
+				mockDatabase.EXPECT().Insert(s.Email, gomock.Any(), gomock.Any())
 				expectedPass := "dummy-password"
-				err := s.SyncStorage([]byte(expectedPass), mockDatabase)
+				err := s.SyncStorage([]byte(expectedPass), mockDatabase, &mongo.Client{})
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 		})

@@ -17,6 +17,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var _ = Describe("Init", func() {
@@ -40,8 +41,8 @@ var _ = Describe("Init", func() {
 
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockDatabase = mocks.NewMockDatabase(mockCtrl)
-		cmd.MongoDB.Database = mockDatabase
-
+		cmd.MongoDB = mockDatabase
+		cmd.Client = &mongo.Client{}
 		initCmd = cmd.NewInitCmd()
 
 		initCmd.SetArgs([]string{})
@@ -75,8 +76,8 @@ var _ = Describe("Init", func() {
 			}()
 
 			mockError := errors.New("Mock error")
-			mockDatabase.EXPECT().Find("dummytest-dummy@mail.com").Return(bson.M{}, mockError)
-			mockDatabase.EXPECT().Insert("dummytest-dummy@mail.com", gomock.Any())
+			mockDatabase.EXPECT().Find("dummytest-dummy@mail.com", gomock.Any()).Return(bson.M{}, mockError)
+			mockDatabase.EXPECT().Insert("dummytest-dummy@mail.com", gomock.Any(), gomock.Any())
 
 			err = initCmd.Execute()
 			Expect(err).ShouldNot(HaveOccurred())
@@ -109,8 +110,8 @@ var _ = Describe("Init", func() {
 
 			expectedErr := errors.New("failed to insert data to db")
 			mockError := errors.New("Mock error")
-			mockDatabase.EXPECT().Find("dummytest-dummy@mail.com").Return(bson.M{}, mockError)
-			mockDatabase.EXPECT().Insert("dummytest-dummy@mail.com", gomock.Any()).Return(expectedErr)
+			mockDatabase.EXPECT().Find("dummytest-dummy@mail.com", gomock.Any()).Return(bson.M{}, mockError)
+			mockDatabase.EXPECT().Insert("dummytest-dummy@mail.com", gomock.Any(), gomock.Any()).Return(expectedErr)
 
 			err = initCmd.Execute()
 			Expect(err).To(Equal(expectedErr))

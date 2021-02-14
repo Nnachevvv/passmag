@@ -75,7 +75,7 @@ func NewEditCmd() *cobra.Command {
 			}
 
 			fmt.Fprintln(cmd.OutOrStdout(), "successfully moved your password")
-			s.SyncStorage(u.Password, MongoDB.Database)
+			s.SyncStorage(u.Password, MongoDB, Client)
 
 			return nil
 		},

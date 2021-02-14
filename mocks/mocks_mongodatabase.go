@@ -7,6 +7,7 @@ package mocks
 import (
 	gomock "github.com/golang/mock/gomock"
 	primitive "go.mongodb.org/mongo-driver/bson/primitive"
+	mongo "go.mongodb.org/mongo-driver/mongo"
 	reflect "reflect"
 )
 
@@ -33,43 +34,31 @@ func (m *MockDatabase) EXPECT() *MockDatabaseMockRecorder {
 	return m.recorder
 }
 
-// Connect mocks base method
-func (m *MockDatabase) Connect() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Connect")
-}
-
-// Connect indicates an expected call of Connect
-func (mr *MockDatabaseMockRecorder) Connect() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Connect", reflect.TypeOf((*MockDatabase)(nil).Connect))
-}
-
 // Find mocks base method
-func (m *MockDatabase) Find(arg0 string) (primitive.M, error) {
+func (m *MockDatabase) Find(arg0 string, arg1 *mongo.Client) (primitive.M, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Find", arg0)
+	ret := m.ctrl.Call(m, "Find", arg0, arg1)
 	ret0, _ := ret[0].(primitive.M)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Find indicates an expected call of Find
-func (mr *MockDatabaseMockRecorder) Find(arg0 interface{}) *gomock.Call {
+func (mr *MockDatabaseMockRecorder) Find(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockDatabase)(nil).Find), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockDatabase)(nil).Find), arg0, arg1)
 }
 
 // Insert mocks base method
-func (m *MockDatabase) Insert(arg0 string, arg1 []byte) error {
+func (m *MockDatabase) Insert(arg0 string, arg1 []byte, arg2 *mongo.Client) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Insert", arg0, arg1)
+	ret := m.ctrl.Call(m, "Insert", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Insert indicates an expected call of Insert
-func (mr *MockDatabaseMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockDatabaseMockRecorder) Insert(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockDatabase)(nil).Insert), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockDatabase)(nil).Insert), arg0, arg1, arg2)
 }

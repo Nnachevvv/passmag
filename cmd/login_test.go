@@ -42,7 +42,7 @@ var _ = Describe("Login", func() {
 
 		mockDatabase = mocks.NewMockDatabase(mockCtrl)
 		mockCrypt = mocks.NewMockCrypter(mockCtrl)
-		cmd.MongoDB.Database = mockDatabase
+		cmd.MongoDB = mockDatabase
 		loginCmd = cmd.NewLoginCmd()
 		cmd.Crypt = mockCrypt
 
@@ -77,7 +77,7 @@ var _ = Describe("Login", func() {
 			expectedPassword := "test-dummy"
 			vaultPwd := argon2.IDKey([]byte(expectedPassword), []byte(expectedEmail), 1, 64*1024, 4, 32)
 
-			mockDatabase.EXPECT().Find("dummytest-dummy2@mail.com").Return(primitive.M{"vault": primitive.Binary{Data: []byte("testValueIn")}}, nil)
+			mockDatabase.EXPECT().Find("dummytest-dummy2@mail.com", gomock.Any()).Return(primitive.M{"vault": primitive.Binary{Data: []byte("testValueIn")}}, nil)
 			mockCrypt.EXPECT().Decrypt(gomock.Any(), vaultPwd)
 			mockCrypt.EXPECT().EncryptFile(gomock.Any(), gomock.Any(), gomock.Any())
 
@@ -111,7 +111,7 @@ var _ = Describe("Login", func() {
 			expectedPassword := "test-dummy"
 			vaultPwd := argon2.IDKey([]byte(expectedPassword), []byte(expectedEmail), 1, 64*1024, 4, 32)
 			err := errors.New("Mock Error")
-			mockDatabase.EXPECT().Find("dummytest-dummy2@mail.com").Return(primitive.M{"vault": primitive.Binary{Data: []byte("testValueIn")}}, nil)
+			mockDatabase.EXPECT().Find("dummytest-dummy2@mail.com", gomock.Any()).Return(primitive.M{"vault": primitive.Binary{Data: []byte("testValueIn")}}, nil)
 			mockCrypt.EXPECT().Decrypt(gomock.Any(), vaultPwd).Return([]byte{}, err)
 
 			err = loginCmd.Execute()
@@ -142,7 +142,7 @@ var _ = Describe("Login", func() {
 			}()
 
 			err := errors.New("Mock Error")
-			mockDatabase.EXPECT().Find("dummytest-dummy2@mail.com").Return(primitive.M{}, err)
+			mockDatabase.EXPECT().Find("dummytest-dummy2@mail.com", gomock.Any()).Return(primitive.M{}, err)
 
 			err = loginCmd.Execute()
 			Expect(err).Should(HaveOccurred())

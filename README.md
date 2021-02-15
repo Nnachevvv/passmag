@@ -13,9 +13,10 @@ The CLI is written with Golang and can be run on Windows, macOS, and Linux distr
 ## Download/Install
 If you already have the golang installed on your system, you can install the CLI using :
 ```
-    go get github.com/nnachevv/passmag
+    go get github.com/nnachevvv/passmag
 ```
 
+MongoDB should be installed as prerequisite.
 ## Running
 If you've installed it:
 

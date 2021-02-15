@@ -7,10 +7,10 @@ import (
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/Netflix/go-expect"
+	"github.com/Nnachevvv/passmag/cmd"
+	"github.com/Nnachevvv/passmag/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/hinshun/vt10x"
-	"github.com/nnachevv/passmag/cmd"
-	"github.com/nnachevv/passmag/mocks"
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

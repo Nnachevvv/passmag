@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"time"
 
-	mongoCli "github.com/nnachevv/passmag/cmd/mongo"
-	"github.com/nnachevv/passmag/crypt"
+	mongoCli "github.com/Nnachevvv/passmag/cmd/mongo"
+	"github.com/Nnachevvv/passmag/crypt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/argon2"

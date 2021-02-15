@@ -1,6 +1,6 @@
 package main
 
-import "github.com/nnachevv/passmag/cmd"
+import "github.com/Nnachevvv/passmag/cmd"
 
 func main() {
 	cmd.Execute()

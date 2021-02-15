@@ -1,7 +1,7 @@
 package random_test
 
 import (
-	. "github.com/nnachevv/passmag/random"
+	. "github.com/Nnachevvv/passmag/random"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/storage"
+	"github.com/Nnachevvv/passmag/storage"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/argon2"
 )

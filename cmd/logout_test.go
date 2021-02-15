@@ -3,7 +3,7 @@ package cmd_test
 import (
 	"bytes"
 
-	"github.com/nnachevv/passmag/cmd"
+	"github.com/Nnachevvv/passmag/cmd"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"

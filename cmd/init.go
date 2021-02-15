@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/nnachevv/passmag/crypt"
-	"github.com/nnachevv/passmag/storage"
+	"github.com/Nnachevvv/passmag/crypt"
+	"github.com/Nnachevvv/passmag/storage"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/argon2"

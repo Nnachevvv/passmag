@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/Nnachevvv/passmag/mocks"
+	"github.com/Nnachevvv/passmag/storage"
 	"github.com/golang/mock/gomock"
-	"github.com/nnachevv/passmag/mocks"
-	"github.com/nnachevv/passmag/storage"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.mongodb.org/mongo-driver/bson/primitive"

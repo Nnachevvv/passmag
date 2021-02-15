@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/AlecAivazis/survey/v2/terminal"
-	mongoCli "github.com/nnachevv/passmag/cmd/mongo"
-	"github.com/nnachevv/passmag/crypt"
+	mongoCli "github.com/Nnachevvv/passmag/cmd/mongo"
+	"github.com/Nnachevvv/passmag/crypt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"

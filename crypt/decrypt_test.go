@@ -4,7 +4,7 @@ import (
 	"crypto/aes"
 	"errors"
 
-	. "github.com/nnachevv/passmag/crypt"
+	. "github.com/Nnachevvv/passmag/crypt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

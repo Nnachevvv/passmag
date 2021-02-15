@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/nnachevv/passmag/random"
+	"github.com/Nnachevvv/passmag/random"
 
-	"github.com/nnachevv/passmag/storage"
+	"github.com/Nnachevvv/passmag/storage"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"

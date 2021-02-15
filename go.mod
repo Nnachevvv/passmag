@@ -1,4 +1,4 @@
-module github.com/nnachevvv/passmag
+module github.com/Nnachevvv/passmag
 
 go 1.15
 
